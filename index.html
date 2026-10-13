@@ -48,6 +48,7 @@ nav button{flex:1;background:transparent;color:var(--mute);height:36px;font-size
  <div><div class="n" id="lk">0</div><div class="row" style="justify-content:center;gap:6px;margin-top:4px"><button class="ic" style="height:28px;width:28px" onpointerdown="kgHold(-.5)" onpointerup="kgStop()" onpointerleave="kgStop()" onpointercancel="kgStop()" onclick="if(event.detail==0)kg(-.5)" aria-label="0,5 kg weniger">−</button><span class="lb" style="color:#fff">KG</span><button class="ic" style="height:28px;width:28px" onpointerdown="kgHold(.5)" onpointerup="kgStop()" onpointerleave="kgStop()" onpointercancel="kgStop()" onclick="if(event.detail==0)kg(.5)" aria-label="0,5 kg mehr">+</button></div></div></div>
  <div class="lb" style="text-align:center;color:#fff;margin-top:10px">WIEDERHOLUNGEN <span id="lg" class="mono"></span></div>
  <div id="lm" style="text-align:center;color:#bbb;font-size:13px;margin-top:6px;min-height:36px"></div>
+ <div id="la" style="text-align:center;color:#8f89ff;font-size:12.5px;margin-top:2px;min-height:30px"></div>
  <div class="area"><div class="track" id="tr"><div class="tg" id="tt" style="top:9px"></div><div class="tg" id="tb" style="bottom:9px"></div><div class="ball" id="bl"></div></div></div>
  <div class="hint" id="lh"></div>
  <div class="row" style="margin-top:6px"><button id="lw" aria-label="Bewegung neu messen" style="font-size:13px" onclick="recal()"></button><button class="k" id="go" style="flex:1;height:44px" onclick="toggle()">Satz starten</button></div>
@@ -59,7 +60,14 @@ const $=s=>document.querySelector(s),fm=n=>String(n).replace('.',',');
 const ld=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const DAYS=[{n:'Arme Beine',c:'linear-gradient(135deg,#6a7df0,#7b4fb0)',d:[0,4],ex:[['Preacher Curl','Maschine',3,6,35],['Trizepsdrücken','Kabel',6,6,12.5],['Konzentrationscurl','Kabel',6,6,10],['Beinpresse','Maschine',3,6,120],['Wadenheben stehend','Maschine',3,6,135],['Beinstrecker','Maschine',3,10,50],['Beinbeuger liegend','Maschine',3,6,45],['Hammer Curl','Kabel',6,6,15]]},
 {n:'Torso',c:'linear-gradient(135deg,#2bb3a3,#3b82d6)',d:[3,6],ex:[['Bankdrücken','Langhantel',3,6,60],['Rudern','Kabel',3,8,55],['Schulterdrücken','Kurzhantel',3,8,20],['Latziehen','Kabel',3,10,55],['Seitheben','Kabel',3,12,8]]}];
-const XI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',CHK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',ARR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>';const LAST=ld('last',{});
+const XI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',CHK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',ARR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>';const ST={m:'v',min:.08,tip:'Am Gewichtsblock (Stahlplatte), Taste nach oben. Der Block fährt senkrecht, wie dein Gewicht.'};
+const PR={'Preacher Curl':{m:'a',min:25,tip:'Am Hebelarm nahe den Griffen. Er schwenkt im Bogen, gezählt wird der Winkel.'},
+'Wadenheben stehend':{...ST,min:.03},'Beinstrecker':{...ST,min:.05},'Beinbeuger liegend':{...ST,min:.05},'Seitheben':{...ST,min:.05},
+'Beinpresse':{m:'p',min:.08,tip:'Am Schlitten (Plattenaufnahme) oder am Gewichtsblock. Die Richtung erkennt der Tracker selbst.'},
+'Bankdrücken':{m:'v',min:.15,tip:'Auf die Hantelstange neben die Griffposition, Taste nach oben. Start mit der Stange auf der Brust oder oben.'},
+'Schulterdrücken':{m:'v',min:.15,tip:'Auf den Stahlgriff oder die Scheibe einer Kurzhantel. Die Hantel fährt senkrecht.'}};
+const prof=n=>PR[n]||ST;
+const LAST=ld('last',{});
 const last=(n,i)=>{let l=LAST[n];if(!l)for(const d of DAYS)for(const e of d.ex)if(e[0]==n)l={kg:e[4],r:Array(e[2]).fill(e[3])};return l?{kg:l.kg,r:l.r[i]!=null?l.r[i]:l.r[l.r.length-1]}:null};
 const ltxt=n=>{const l=last(n,0);return l?' · Letztes Mal '+l.r+' Wdh. mit '+fm(l.kg)+' kg':''};
 function moti(n,i,tot,kg){const l=last(n,i),a=[];
@@ -134,46 +142,79 @@ function R(){
 setInterval(()=>{const e=$('#wt');if(e&&S.W)e.textContent=(S.v=='heute'?'In Bearbeitung · ':'')+mmss(Date.now()-S.W.t0);if(L&&L.t0)$('#lt').textContent=mmss(Date.now()-L.t0)},1000);
 /* ---------- Live-Tracking ---------- */
 function openLive(ei,sj){const e=S.W.ex[ei];let si=sj!=null?sj:e.s.findIndex(s=>!s.d);if(si<0){addSet(ei);si=e.s.length-1}
- L={ei,si,reps:0,ph:0,mx:0,run:false,t0:0,kg:e.s[si].kg,goal:e.s[si].r,E:e,base:0,cal:e.range?null:newCal()};
- $('#live').style.display='flex';$('#lh').textContent='';upd();$('#lm').textContent=moti(e.n,si,e.s.length,L.kg);bar(0);$('#go').textContent='Satz starten'}
+ L={ei,si,reps:0,ph:0,mx:0,run:false,t0:0,kg:e.s[si].kg,goal:e.s[si].r,E:e,base:0,cal:e.range?null:newCal(),pf:prof(e.n),U:{min:prof(e.n).min,h:prof(e.n).m=='a'?8:prof(e.n).min/2}};
+ $('#live').style.display='flex';$('#lh').textContent='';upd();$('#lm').textContent=moti(e.n,si,e.s.length,L.kg);$('#la').textContent='Befestigen: '+prof(e.n).tip;bar(0);$('#go').textContent='Satz starten'}
 const newCal=()=>({n:0,lo:0,hi:0,ph:0,amps:[]});
 function upd(){$('#ls').textContent=(L.si+1)+'.';$('#lr').textContent=L.reps;$('#lk').textContent=fm(L.kg);$('#lg').textContent='von '+L.goal;$('#lw').textContent=L.E.range?'Neu messen':'Misst …'}
 function kg(d){if(L){L.kg=Math.max(0,Math.round((L.kg+d)*2)/2);upd()}}
 let hk=0,ht=0;function kgHold(d){kg(d);ht=setTimeout(()=>{hk=setInterval(()=>kg(d),90)},400)}function kgStop(){clearTimeout(ht);clearInterval(hk)}
 function recal(){if(!L)return;L.E.range=null;L.cal=newCal();L.base=Pp;L.ph=0;sv('W',S.W);upd();$('#lh').textContent='Neu messen: 3 Wiederholungen ganz hoch, ganz runter'}
-function toggle(){if(!L)return;L.run?endSet():startSet()}
-function startSet(){L.run=true;L.reps=0;L.ph=0;L.mx=0;L.t0=Date.now();Vv=0;Pp=0;G=null;$('#go').textContent='Satz beenden';$('#lh').textContent=L.cal?'Kalibrierung 1 von 3: ganz hoch, ganz runter':'Ganz nach oben, dann ganz nach unten';upd();
+function toggle(){if(!L||L.arm)return;L.run?endSet():startSet()}
+function startSet(){L.run=!S.imu;L.arm=!!S.imu;L.reps=0;L.ph=0;L.mx=0;L.t0=Date.now();Vv=0;Pp=0;G=null;$('#go').textContent='Satz beenden';$('#lh').textContent=S.imu?'Ruhig halten …':L.cal?'Kalibrierung 1 von 3: ganz hoch, ganz runter':'Ganz nach oben, dann ganz nach unten';if(S.imu)AR={n:0,a:[0,0,0],g:[0,0,0]};$('#la').textContent='';tc('S');upd();
  if(!S.bt&&!sim){let t=0;sim=setInterval(()=>{t+=.02;const c=Math.floor(t/3.4),amp=c%4==3?.78:1.03;pos(.38*amp*.5*(1-Math.cos(2*Math.PI*t/3.4)))},20)}}
-function endSet(){L.run=false;clearInterval(sim);sim=null;const e=S.W.ex[L.ei],si=L.si,s=e.s[si];let ok=0;if(L.reps>0){s.r=L.reps;s.kg=L.kg;s.d=1;ok=1;sv('W',S.W)}const msg=ok?doneMsg(e.n,si,s.r):'';closeLive();if(GU&&ok){const nx=nextSet();nx?openRest(nx,e,msg):openDone()}}
+function endSet(){L.run=false;L.arm=false;tc('E');clearInterval(sim);sim=null;const e=S.W.ex[L.ei],si=L.si,s=e.s[si];let ok=0;if(L.reps>0){s.r=L.reps;s.kg=L.kg;s.d=1;ok=1;sv('W',S.W)}const msg=ok?doneMsg(e.n,si,s.r):'';closeLive();if(GU&&ok){const nx=nextSet();nx?openRest(nx,e,msg):openDone()}}
 function closeLive(){if(L&&L.run){clearInterval(sim);sim=null}L=null;cancelAnimationFrame(raf);raf=0;$('#live').style.display='none';R()}
 function flash(id){const e=$(id);e.classList.remove('hit');void e.offsetWidth;e.classList.add('hit');if(navigator.vibrate)navigator.vibrate(30)}
-function repPop(){const r=$('#lr');r.textContent=L.reps;r.classList.remove('pop');void r.offsetWidth;r.classList.add('pop')}
+function repPop(){tc('F');const r=$('#lr');r.textContent=L.reps;r.classList.remove('pop');void r.offsetWidth;r.classList.add('pop')}
 function calStep(P){const c=L.cal;
- if(c.ph==0){c.lo=Math.min(c.lo,P);c.hi=Math.max(c.hi,P);if(c.hi-c.lo>=.08&&P<c.hi-.04){c.amp=c.hi-c.lo;c.ph=1;flash('#tt')}}
+ if(c.ph==0){if(P<c.lo){c.lo=P;c.hi=P}else c.hi=Math.max(c.hi,P);if(c.hi-c.lo>=L.U.min&&P<c.hi-L.U.h){c.amp=c.hi-c.lo;c.ph=1;flash('#tt')}}
  else if(P>c.hi){c.ph=0;c.hi=P}
  else if(P<=c.lo+.2*c.amp){c.amps.push(c.amp);c.n++;L.reps++;flash('#tb');repPop();c.ph=0;c.lo=P;c.hi=P;
-  if(c.n>=3){const m=c.amps.reduce((a,b)=>a+b,0)/3;L.E.range=Math.max(.1,m);L.base=P;L.cal=null;L.ph=0;L.mx=0;sv('W',S.W);upd();$('#lh').textContent='Bewegung gemessen. Ab jetzt zählt nur die ganze Bewegung.'}
+  if(c.n>=3){const m=c.amps.reduce((a,b)=>a+b,0)/3;L.E.range=Math.max(L.U.min,m);L.base=P;L.cal=null;L.ph=0;L.mx=0;sv('W',S.W);upd();$('#lh').textContent='Bewegung gemessen. Ab jetzt zählt nur die ganze Bewegung.'}
   else $('#lh').textContent='Kalibrierung '+(c.n+1)+' von 3: ganz hoch, ganz runter'}
- return Math.max(0,Math.min(1,(P-c.lo)/Math.max(.2,c.hi-c.lo+.02)))}
+ return Math.max(0,Math.min(1,(P-c.lo)/Math.max(L.U.min*2,c.hi-c.lo)))}
 function pos(p){if(!L||!L.run)return;
  if(L.cal){ftar=calStep(p);if(!raf)raf=requestAnimationFrame(draw);return}
- const f=Math.max(0,Math.min(1,(p-L.base)/L.E.range));ftar=f;L.mx=Math.max(L.mx,f);
+ if(L.ph==0&&p<L.base)L.base=p;const f=Math.max(0,Math.min(1,(p-L.base)/L.E.range));ftar=f;L.mx=Math.max(L.mx,f);
  if(L.ph==0&&f>=.93){$('#tb').classList.remove('hit');flash('#tt');L.ph=1;L.mx=0;$('#lh').textContent='Jetzt ganz nach unten'}
- else if(L.ph==1&&f<=.07){$('#tt').classList.remove('hit');flash('#tb');L.ph=0;L.reps++;const r=$('#lr');r.textContent=L.reps;r.classList.remove('pop');void r.offsetWidth;r.classList.add('pop');$('#lh').textContent='Ganz nach oben'}
+ else if(L.ph==1&&f<=.07){$('#tt').classList.remove('hit');flash('#tb');L.ph=0;L.reps++;tc('F');L.base=p;const r=$('#lr');r.textContent=L.reps;r.classList.remove('pop');void r.offsetWidth;r.classList.add('pop');$('#lh').textContent='Ganz nach oben'}
  else if(L.ph==1&&L.mx<.93&&f<.3&&L.mx>.3){L.mx=0;$('#lh').textContent='Nicht ganz oben, zählt nicht';L.ph=0}
  if(!raf)raf=requestAnimationFrame(draw)}
 function bar(f){const tr=$('#tr'),h=tr.clientHeight-42;$('#bl').style.top=((1-f)*h)+'px'}
 function draw(){raf=0;if(!L)return;fdisp+=(ftar-fdisp)*.35;bar(fdisp);if(Math.abs(ftar-fdisp)>.002)raf=requestAnimationFrame(draw)}
+/* ---------- Sensor-Fusion (Beschleunigung + Gyro) ---------- */
+let TS=null,AR=null;const D2R=Math.PI/180,nrm=v=>{const n=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/n,v[1]/n,v[2]/n]};
+const tc=c=>{try{S.cc&&S.cc.writeValueWithoutResponse(new TextEncoder().encode(c)).catch(()=>{})}catch(e){}};
+function axU(T,v,ax){const C=T.C||(T.C=[0,0,0,0,0,0]),k=.998;C[0]=k*C[0]+v[0]*v[0];C[1]=k*C[1]+v[1]*v[1];C[2]=k*C[2]+v[2]*v[2];C[3]=k*C[3]+v[0]*v[1];C[4]=k*C[4]+v[0]*v[2];C[5]=k*C[5]+v[1]*v[2];
+ return nrm([C[0]*ax[0]+C[3]*ax[1]+C[4]*ax[2],C[3]*ax[0]+C[1]*ax[1]+C[5]*ax[2],C[4]*ax[0]+C[5]*ax[1]+C[2]*ax[2]])}
+function mah(ax,ay,az,gx,gy,gz,dt){let[q0,q1,q2,q3]=TS.q;const n=Math.hypot(ax,ay,az);
+ if(n>.7&&n<1.3){const nx=ax/n,ny=ay/n,nz=az/n,vx=2*(q1*q3-q0*q2),vy=2*(q0*q1+q2*q3),vz=q0*q0-q1*q1-q2*q2+q3*q3;gx+=.8*(ny*vz-nz*vy);gy+=.8*(nz*vx-nx*vz);gz+=.8*(nx*vy-ny*vx)}
+ const h=.5*dt,a0=q0,a1=q1,a2=q2;q0+=(-a1*gx-a2*gy-q3*gz)*h;q1+=(a0*gx+a2*gz-q3*gy)*h;q2+=(a0*gy-a1*gz+q3*gx)*h;q3+=(a0*gz+a1*gy-a2*gx)*h;
+ const m=Math.hypot(q0,q1,q2,q3);TS.q=[q0/m,q1/m,q2/m,q3/m]}
+function armDone(){const k=AR.n,a=AR.a.map(v=>v/k),g=AR.g.map(v=>v/k),u=nrm(a),ux=u[1],uy=-u[0],s=Math.hypot(ux,uy),th=Math.atan2(s,u[2]);let q;
+ if(s<1e-6)q=u[2]>0?[1,0,0,0]:[0,1,0,0];else{const h=th/2,sn=Math.sin(h)/s;q=[Math.cos(h),ux*sn,uy*sn,0]}
+ TS={q,gb:g,v:0,p:0,ang:0,st:0,ax:null,C:null,sg:0};L.arm=false;L.run=true;L.base=0;L.t0=Date.now();$('#lh').textContent=L.cal?'Los! Kalibrierung 1 von 3':'Los!'}
+function imuIn(ax,ay,az,gx,gy,gz,dt){if(!L)return;
+ if(L.arm){AR.n++;AR.a[0]+=ax;AR.a[1]+=ay;AR.a[2]+=az;AR.g[0]+=gx;AR.g[1]+=gy;AR.g[2]+=gz;if(AR.n*dt>=.7)armDone();return}
+ if(L.run&&TS)imu(ax,ay,az,gx,gy,gz,dt)}
+function imu(ax,ay,az,gx,gy,gz,dt){const T=TS;gx-=T.gb[0];gy-=T.gb[1];gz-=T.gb[2];mah(ax,ay,az,gx*D2R,gy*D2R,gz*D2R,dt);
+ const[q0,q1,q2,q3]=T.q,gm=Math.hypot(gx,gy,gz),n=Math.hypot(ax,ay,az),m=L.pf.m;T.st=(gm<8&&Math.abs(n-1)<.05&&Math.abs(T.v)<.06)?T.st+dt:0;let sig;
+ if(m=='a'){if(gm>30){const g3=[gx,gy,gz];T.ax=T.ax?axU(T,g3,T.ax):nrm(g3)}if(T.ax)T.ang+=(gx*T.ax[0]+gy*T.ax[1]+gz*T.ax[2])*dt;sig=T.ang}
+ else{const aw=[(1-2*(q2*q2+q3*q3))*ax+2*(q1*q2-q0*q3)*ay+2*(q1*q3+q0*q2)*az,2*(q1*q2+q0*q3)*ax+(1-2*(q1*q1+q3*q3))*ay+2*(q2*q3-q0*q1)*az,2*(q1*q3-q0*q2)*ax+2*(q2*q3+q0*q1)*ay+(1-2*(q1*q1+q2*q2))*az].map(v=>v*9.81);aw[2]-=9.81;
+  let lin=aw[2];if(m=='p'){if(Math.hypot(aw[0],aw[1],aw[2])>1)T.ax=T.ax?axU(T,aw,T.ax):nrm(aw);lin=T.ax?aw[0]*T.ax[0]+aw[1]*T.ax[1]+aw[2]*T.ax[2]:0}
+  T.v=(T.v+lin*dt)*Math.pow(.998,dt/.02);if(T.st>.15)T.v=0;T.p+=T.v*dt;sig=T.p}
+ if(!T.sg&&Math.abs(sig)>L.U.min*.5)T.sg=sig>0?1:-1;pos((T.sg||1)*sig)}
 /* ---------- Tracker (Bluetooth) ---------- */
-function acc(x,y,z){const dt=.02;if(!G)G=[x,y,z];const a=[x,y,z];for(let i=0;i<3;i++)G[i]+=.004*(a[i]-G[i]);
+function acc(x,y,z,dt){dt=dt||.02;if(!G)G=[x,y,z];const al=Math.min(1,dt*.2),v=[x,y,z];for(let i=0;i<3;i++)G[i]+=al*(v[i]-G[i]);
  const gm=Math.hypot(G[0],G[1],G[2])||1,lin=((x-G[0])*G[0]+(y-G[1])*G[1]+(z-G[2])*G[2])/gm*9.81;
- Vv=(Vv+lin*dt)*.985;calm=Math.abs(Math.hypot(x,y,z)-gm)<.04?calm+1:0;if(calm>8)Vv=0;Pp+=Vv*dt;pos(Pp)}
+ Vv=(Vv+lin*dt)*Math.pow(.985,dt/.02);calm=Math.abs(Math.hypot(x,y,z)-gm)<.04?calm+1:0;if(calm>.16/dt)Vv=0;Pp+=Vv*dt;pos(Pp)}
+const NS='7a1c0001-0b6e-4a3f-9d2b-5c1a8e0f1001',ND='7a1c0002-0b6e-4a3f-9d2b-5c1a8e0f1001',NI='7a1c0003-0b6e-4a3f-9d2b-5c1a8e0f1001';
+function btn(){if(L&&!L.arm){L.run?endSet():startSet()}}
 async function connect(){const b=$('#cn');
- try{if(!navigator.bluetooth)throw new Error('nb');const d=await navigator.bluetooth.requestDevice({filters:[{name:'RepTracker'}],optionalServices:[SVC]});
-  const sr=await d.gatt.connect(),sc=await sr.getPrimaryService(SVC),a=await sc.getCharacteristic(AC),st=await sc.getCharacteristic(SC);
-  a.addEventListener('characteristicvaluechanged',e=>{const v=e.target.value;acc(v.getInt16(0,true)/1000,v.getInt16(2,true)/1000,v.getInt16(4,true)/1000)});
-  st.addEventListener('characteristicvaluechanged',e=>{if(!L)return;const on=e.target.value.getUint8(0)==1;if(on&&!L.run){clearInterval(sim);sim=null;startSet()}else if(!on&&L.run)endSet()});
-  await a.startNotifications();await st.startNotifications();S.bt=true;b.textContent='Tracker verbunden';d.addEventListener('gattserverdisconnected',()=>{S.bt=false;b.textContent='Tracker verbinden'})}
- catch(e){b.textContent=e.message=='nb'?'Bluetooth nicht verfügbar (Simulation)':'Keine Verbindung (Simulation)'}}
+ try{if(!navigator.bluetooth)throw new Error('nb');
+  const d=await navigator.bluetooth.requestDevice({filters:[{services:[NS]},{name:'Hantel-Tracker'},{name:'RepTracker'}],optionalServices:[NS,SVC]});
+  const sr=await d.gatt.connect();let sc=null;
+  try{sc=await sr.getPrimaryService(NS)}catch(e){}
+  if(sc){const inf=await(await sc.getCharacteristic(NI)).readValue(),rate=inf.getUint16(2,true)||100,al=inf.getUint16(4,true)||4096,gl=(inf.getUint16(6,true)||328)/10,dc=await sc.getCharacteristic(ND);S.cc=await sc.getCharacteristic('7a1c0004-0b6e-4a3f-9d2b-5c1a8e0f1001').catch(()=>null);
+   dc.addEventListener('characteristicvaluechanged',e=>{const v=e.target.value,h=v.getUint8(0);
+    if(h==0xA1){const n=v.getUint8(1);for(let i=0;i<n;i++){const o=8+12*i;imuIn(v.getInt16(o,true)/al,v.getInt16(o+2,true)/al,v.getInt16(o+4,true)/al,v.getInt16(o+6,true)/gl,v.getInt16(o+8,true)/gl,v.getInt16(o+10,true)/gl,1/rate)}}
+    else if(h==0xB1&&v.getUint8(1)==1)btn()});
+   await dc.startNotifications();S.imu=true}
+  else{sc=await sr.getPrimaryService(SVC);const a=await sc.getCharacteristic(AC),st=await sc.getCharacteristic(SC);
+   a.addEventListener('characteristicvaluechanged',e=>{const v=e.target.value;acc(v.getInt16(0,true)/1000,v.getInt16(2,true)/1000,v.getInt16(4,true)/1000)});
+   st.addEventListener('characteristicvaluechanged',e=>{if(!L)return;const on=e.target.value.getUint8(0)==1;if(on&&!L.run)startSet();else if(!on&&L.run)endSet()});
+   await a.startNotifications();await st.startNotifications()}
+  S.bt=true;b.textContent='Tracker verbunden';d.addEventListener('gattserverdisconnected',()=>{S.bt=false;S.imu=false;S.cc=null;b.textContent='Tracker verbinden'})}
+ catch(e){S.bt=false;b.textContent=e.message=='nb'?'Bluetooth nicht verfügbar (Simulation)':('Keine Verbindung: '+String(e.message||e).slice(0,36))}}
 R();
 </script></body></html>
