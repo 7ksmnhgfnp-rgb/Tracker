@@ -192,7 +192,7 @@ function loop(){const id=++LP;let lt=performance.now();const f=now=>{if(id!==LP|
  const pks=T.pks||[],acc=T.tt>0?T.ti/T.tt:0,pk=pks.length?pks.reduce((a,b)=>a+b,0)/pks.length:0;$("reps").textContent=T.reps;
  ringSet("r1",T.reps/T.target,RC[0]);ringSet("r2",acc,RC[1]);ringSet("r3",pk,RC[2]);$("v1").textContent=T.reps+" / "+T.target;$("v2").textContent=T.tt>0?Math.round(acc*100)+" %":"–";$("v3").textContent=pks.length?Math.round(pk*100)+" %":"–";
  let c1="Bereit",c2="Ziel: "+T.target+" saubere Wdh.";
- if(T.fin){c1="Satz geschafft";c2=T.msg||""}else if(T.cal&&T.run){c1="Einmessen";c2="Einmal ganz hoch und ganz runter"}else if(act&&t<0){c1=String(Math.ceil(-t));c2="Gleich geht’s los"}else if(live){const q=cueOf(t);c1=q[0];c2=T.msg||q[1]}else if(T.msg)c2=T.msg;
+ if(T.fin){c1="Satz geschafft";c2=T.msg||""}else if(T.run&&now<T.t1+1500){c1="Ruhig halten";c2="Die Ausrichtung wird erkannt"}else if(T.cal&&T.run){c1="Einmessen";c2="Einmal ganz hoch und ganz runter (mind. 10 cm)"}else if(act&&t<0){c1=String(Math.ceil(-t));c2="Gleich geht’s los"}else if(live){const q=cueOf(t);c1=q[0];c2=T.msg||q[1]}else if(T.msg)c2=T.msg;
  $("cue").textContent=c1;$("sub").textContent=c2;
  $("tm").textContent=T.t0?mm(((T.run?Date.now():T.te||Date.now())-T.t0)/1000):"00:00";$("cs").className="cs"+(conn?" on":"");
  $("go").textContent=T.fin?"Satz speichern":T.run?"Satz beenden":"Satz starten";$("ms").textContent=T.run?(T.cal?"Kalibriert …":"Misst …"):T.fin?"Fertig":"Bereit";requestAnimationFrame(f)};requestAnimationFrame(f)}
@@ -209,11 +209,12 @@ function vWork3(){const c=S.cur;initT();const tot=c.ex.reduce((n,e)=>n+e.sets.le
  <div class="row mut" style="justify-content:center;padding:14px 0 2px;cursor:pointer" data-act="as" data-e="${ei}">${I("plus",20)}<span>Satz hinzufügen</span></div></section>`).join("")}
 function vTest(){return hero(`<div class="row sp">${bk("back")}<span class="row" style="gap:8px"><span class="dot ${conn?"on":""}"></span><span class="mut" style="font-size:13px">${conn?"Verbunden mit "+esc(conn):"Nicht verbunden"}</span></span></div><h1 style="margin:18px 0 8px">Tracker-Test</h1><p class="mut" style="margin:0 0 16px">Prüfe Verbindung und Sensorwerte. Kippe und bewege den Tracker.</p><div class="row"><button class="pb" style="flex:1" data-act="conn">Verbinden</button><button class="pg" data-act="disc">Trennen</button></div>`)
  +dk(`<div class="lbl mut">Live-Daten</div><div class="trow"><span>Pakete pro Sekunde (Soll 50)</span><b id="t_hz">–</b></div><div class="trow"><span>Beschleunigung X</span><b id="t_x">–</b></div><div class="trow"><span>Beschleunigung Y</span><b id="t_y">–</b></div><div class="trow"><span>Beschleunigung Z</span><b id="t_z">–</b></div><div class="trow"><span>Betrag (Soll ca. 1000 mg)</span><b id="t_g">–</b></div>`)
- +dk(`<div class="lbl mut">Bewegung</div><div class="trow"><span>Neigung (Hebelarm)</span><b id="t_a">–</b></div><div class="trow"><span>Hub vertikal (Stapel, grob)</span><b id="t_p">–</b></div><canvas id="t_cv" width="320" height="90" style="width:100%;height:90px;margin-top:10px;border-radius:14px;background:#141417"></canvas><div style="margin-top:12px"><button class="pw full" data-act="zero">Nullpunkt setzen</button></div><p class="mut" style="font-size:13px;margin:12px 0 0">Lege den Tracker ruhig hin, tippe „Nullpunkt setzen“ und kippe ihn dann. Die Neigung muss steigen. Liegt der Betrag nicht bei etwa 1000, stimmt etwas mit dem Sensor nicht.</p>`)}
+ +dk(`<div class="lbl mut">Bewegung</div><div class="trow"><span>Erkannte Ausrichtung</span><b id="t_o">–</b></div><div class="trow"><span>Neigung (Hebelarm)</span><b id="t_a">–</b></div><div class="trow"><span>Hub vertikal (Stapel, grob)</span><b id="t_p">–</b></div><canvas id="t_cv" width="320" height="90" style="width:100%;height:90px;margin-top:10px;border-radius:14px;background:#141417"></canvas><div style="margin-top:12px"><button class="pw full" data-act="zero">Nullpunkt setzen</button></div><p class="mut" style="font-size:13px;margin:12px 0 0">Lege den Tracker ruhig hin, tippe „Nullpunkt setzen“ und kippe ihn dann. Die Neigung muss steigen. Liegt der Betrag nicht bei etwa 1000, stimmt etwas mit dem Sensor nicht.</p>`)}
 let tn0=0,tt0=performance.now(),thist=[];
 setInterval(()=>{if(V.v!=="test"||!$("t_x"))return;const n=performance.now(),ok=conn&&E.init;
  if(n-tt0>=1000){$("t_hz").textContent=conn?Math.round(((E.n||0)-tn0)*1000/(n-tt0)):"–";tn0=E.n||0;tt0=n}
  $("t_x").textContent=ok?E.ax+" mg":"–";$("t_y").textContent=ok?E.ay+" mg":"–";$("t_z").textContent=ok?E.az+" mg":"–";$("t_g").textContent=ok?Math.round(Math.hypot(E.ax,E.ay,E.az))+" mg":"–";
+ if(ok){const g=E.gs,ab=g.map(Math.abs),i=ab.indexOf(Math.max(...ab)),tilt=Math.round(Math.acos(Math.min(1,ab[i]/(Math.hypot(...g)||1)))*180/Math.PI);$("t_o").textContent=(i===2?"flach":"hochkant")+" · "+(g[i]>0?"+":"−")+"XYZ"[i]+(tilt>10?" (schräg "+tilt+"°)":"")}else $("t_o").textContent="–";
  const deg=ok?E.th*180/Math.PI:0;$("t_a").textContent=ok?deg.toFixed(1)+"°":"–";$("t_p").textContent=ok?(E.gp*100).toFixed(1)+" cm":"–";
  thist.push(deg);if(thist.length>120)thist.shift();const cv=$("t_cv"),x=cv.getContext("2d");x.clearRect(0,0,320,90);x.strokeStyle="#c8f23d";x.lineWidth=2;x.beginPath();const mx=Math.max(30,...thist);thist.forEach((v,i)=>{const px=i*320/119,py=84-v/mx*76;i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()},100);
 function sheet(){const d=S.rt.find(x=>x.id===V.rid).days.find(x=>x.id===V.did),e=V.sh.i>=0?d.ex[V.sh.i]:{n:"",type:"Machine",s:3,r:8,mode:"stack"};
@@ -234,8 +235,8 @@ function startTrack(ei){newT(ei,true);V.v="workout";R()}
 function startTrackOld(ei){const e=S.cur.ex[ei];let si=e.sets.findIndex(s=>!s.d);if(si<0){const l=e.sets[e.sets.length-1];e.sets.push({w:l?l.w:"",r:e.t,d:0});si=e.sets.length-1}
  const s=e.sets[si];T={ei,si,ex:e,kg:+s.w||0,target:+s.r||e.t,run:false,cal:false,reps:0,pos:0,sim:0,up:0,pk:0,t0:0,te:0,fin:false,rmax:0,tgt:1,msg:"",pts:0,k:0,hits:[],tr:[],qs:[],low:0,tpk:0,go:Infinity};V.v="track";R()}
 function goBtn(){if(T.run||T.fin){finSet();return}if(S.cur.ex[T.ei].sets[T.si].d){newT(T.ei,true);R()}const n=performance.now();
- Object.assign(T,{run:true,reps:0,t0:Date.now(),te:0,t1:n,up:0,pk:0,tgt:1,rmax:0,amax:0,smax:0,fin:false,msg:"",pts:0,k:0,hits:[],tr:[],qs:[],low:n,tpk:n,pks:[],tt:0,ti:0,aT:0,aB:1,fT:0,fB:0,go:Infinity});
- E.gp=0;E.gv=0;if(E.gf)E.g0=E.gf.slice();T.cal=!!conn&&!S.rom[T.ex.n];if(!T.cal)T.go=n+3300;beep(500)}
+ Object.assign(T,{run:true,reps:0,t0:Date.now(),te:0,t1:n,up:0,pk:0,tgt:1,rmax:0,amax:0,smax:0,fin:false,msg:"",pts:0,k:0,hits:[],tr:[],qs:[],low:n,tpk:n,pks:[],tt:0,ti:0,aT:0,aB:1,fT:0,fB:0,sa:null,gset:0,go:Infinity});
+ E.gp=0;E.gv=0;if(E.gf)E.g0=E.gf.slice();T.cal=!!conn&&!S.rom[T.ex.n];if(!T.cal)T.go=n+4800;beep(500)}
 function finSet(){T.run=false;if(T.reps>0){const s=S.cur.ex[T.ei].sets[T.si];s.w=T.kg;s.r=T.reps;s.d=1;S.cur.rest=Date.now();save()}nextAfter();V.v="workout";R()}
 function rep(now,pk){const tu=S.tu,td=S.td,up=(T.tpk-T.low)/1000,dn=Math.max(.2,(now-T.tpk)/1000-.5),rom=Math.min(1,pk),ts=1-Math.min(1,(Math.abs(up-tu)/tu+Math.abs(dn-td)/td)/2),q=Math.round(100*(.5*rom+.5*ts));
  T.qs.push(q);(T.pks=T.pks||[]).push(rom);T.pts+=q;T.reps++;T.msg=q>=85?"Perfekt! "+q+" %":up<tu*.6?"Zu schnell hoch":dn<td*.6?"Zu schnell runter":"Gut: "+q+" %";
@@ -246,8 +247,8 @@ function stepPos(p,now){if(now<T.go)return;const hi=S.rm/100,lo=1-hi;
  else{T.pk=Math.max(T.pk,p);if(p<=lo){T.up=0;const pk=T.pk;T.pk=0;T.tgt=1;T.low=now;rep(now,pk)}}}
 function step(){const e=T.ex,n=performance.now(),rom=S.rom[e.n];
  if(T.cal){const a=E.th,s=E.gp;T.amax=Math.max(T.amax,a);T.smax=Math.max(T.smax,s);const arm=T.amax>.3,raw=arm?a:s,mx=arm?T.amax:T.smax;T.rmax=mx;T.pos=Math.min(1,raw/(mx||1));
-  if((T.amax>.3||T.smax>.004)&&raw<mx*.2&&n-T.t1>1200){S.rom[e.n]={m:arm?"arm":"stack",v:mx};T.cal=false;T.up=0;T.pk=0;T.tgt=1;T.pos=0;T.go=n+3300;T.low=T.go;T.msg="Umfang gemessen – gleich geht’s los!";save();beep(800)}return}
- const m=typeof rom==="object"?rom.m:e.mode,v=typeof rom==="object"?rom.v:rom,raw=m==="arm"?E.th:E.gp,p=cl(raw/v,-.1,1.1);T.pos+=(p-T.pos)*.4;stepPos(T.pos,n)}
+  if((T.amax>.3||T.smax>.05)&&raw<mx*.2&&n-T.t1>1200){S.rom[e.n]={m:arm?"arm":"stack",v:mx};T.cal=false;T.up=0;T.pk=0;T.tgt=1;T.pos=0;T.go=n+3300;T.low=T.go;T.msg="Umfang gemessen – gleich geht’s los!";save();beep(800)}return}
+ const m=typeof rom==="object"?rom.m:e.mode,v=typeof rom==="object"?rom.v:rom,raw=m==="arm"?E.th:E.gp,p=raw/v<.04?0:cl(raw/v,-.1,1.1);T.pos+=(p-T.pos)*.4;stepPos(T.pos,n)}
 function stepOld(){const e=T.ex,raw=e.mode==="arm"?E.th:E.gp,rom=S.rom[e.n],n=performance.now();
  if(T.cal){T.rmax=Math.max(T.rmax,raw);T.pos=Math.min(1,raw/(T.rmax||1));
   if(T.rmax>(e.mode==="arm"?.15:.004)&&raw<T.rmax*.2&&n-T.t1>1200){S.rom[e.n]=T.rmax;T.cal=false;T.up=0;T.pk=0;T.tgt=1;T.pos=0;T.go=n+3300;T.low=T.go;T.msg="Umfang gemessen – gleich geht’s los!";save();beep(800)}return}
@@ -305,11 +306,11 @@ function loopOld(){const id=++LP;let lt=performance.now();const f=now=>{if(id!==
  $("msg").textContent=T.msg||(T.cal?"Eine volle Wiederholung zum Messen: ganz hoch, ganz runter.":"Ziel: "+T.target+" saubere Wiederholungen. Ganz hoch, ganz runter.");requestAnimationFrame(f)};requestAnimationFrame(f)}
 /* ---------- Sensor ---------- */
 function feed(ax,ay,az){E.n=(E.n||0)+1;E.ax=ax;E.ay=ay;E.az=az;const A=[ax,ay,az];if(!E.init){E.gs=A.slice();E.gf=A.slice();E.g0=A.slice();E.init=1}
- E.gs=E.gs.map((x,i)=>x*.99+A[i]*.01);E.gf=E.gf.map((x,i)=>x*.8+A[i]*.2);
+ const run=!!(T&&T.run&&S.cur&&V.v==="workout");if(!run)E.gs=E.gs.map((x,i)=>x*.9+A[i]*.1);E.gf=E.gf.map((x,i)=>x*.8+A[i]*.2);
  const gn=Math.hypot(...E.gs)||1,a=((ax*E.gs[0]+ay*E.gs[1]+az*E.gs[2])/gn-gn)*.00981;
- E.gv=E.gv*.99+a*.02;E.st=Math.abs(a)<.12?E.st+1:0;if(E.st>40){E.gv=0;E.gp*=.5}E.gp=E.gp*.995+E.gv*.02;
+ E.av=(E.av||0)*.85+a*.15;E.gv=E.gv*.99+a*.02;E.st=Math.abs(E.av)<.04?E.st+1:0;if(E.st>50){E.gv=0;E.gp*=.5}E.gp=E.gp*.995+E.gv*.02;
  const n1=Math.hypot(...E.gf)||1,n0=Math.hypot(...E.g0)||1,c=(E.gf[0]*E.g0[0]+E.gf[1]*E.g0[1]+E.gf[2]*E.g0[2])/(n1*n0);E.th=Math.acos(cl(c,-1,1));
- if(T&&T.run&&S.cur&&V.v==="workout")step()}
+ if(run){const n=performance.now();if(n<T.t1+1500){T.sa=T.sa||[0,0,0,0];T.sa[0]+=ax;T.sa[1]+=ay;T.sa[2]+=az;T.sa[3]++}else{if(!T.gset){T.gset=1;if(T.sa&&T.sa[3]>5){const k=T.sa[3];E.gs=[T.sa[0]/k,T.sa[1]/k,T.sa[2]/k];E.g0=E.gs.slice()}E.gp=0;E.gv=0;E.st=0}step()}}}
 let BD=null;
 async function connect(){if(!navigator.bluetooth){alert("Dein Browser unterstützt kein Web Bluetooth. Nutze Chrome (Android/PC) oder den Browser „Bluefy“ (iPhone).");return}
  try{const d=await navigator.bluetooth.requestDevice({filters:[{services:[SVC]},{namePrefix:"RepTracker"}],optionalServices:[SVC]});BD=d;await link(d)}
