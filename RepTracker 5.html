@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><title>RepTracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--ac:#c8f23d;--sf:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{background:#000}html,body{margin:0;min-height:100%}
+body{background:#000;color:#fff;font:400 15px Inter,-apple-system,"SF Pro Text",system-ui,sans-serif;max-width:520px;margin:auto}
+#app{padding:calc(8px + env(safe-area-inset-top,0px)) 12px calc(96px + var(--sf))}body.nn #app{padding-bottom:calc(24px + var(--sf))}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.9px}h1{font-size:32px;line-height:1.05}h2{font-size:25px}h3{font-size:18px}p{margin:10px 0}
+.mut{color:#8e8e96}.hero .mut{color:#6e6e76}.mono,.sr input,.th{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.row{display:flex;align-items:center;gap:14px}.sp{justify-content:space-between}.ctr{text-align:center}
+button,input,select{font:inherit;color:inherit}button{border:0;background:none;padding:0;cursor:pointer}
+.hero{background:#fff;color:#0b0b0c;border-radius:30px;padding:20px 20px 22px;position:relative;z-index:2;min-height:170px}.hero.sm{min-height:0;padding:12px 16px 14px}
+.dk{background:#1c1c1e;border-radius:28px;padding:46px 18px 18px;margin-top:-30px;position:relative;z-index:1}.dk+.dk{margin-top:10px;padding-top:18px}
+.lbl{font-size:13px;font-weight:500;margin-bottom:8px;letter-spacing:.2px}
+.pb,.pw,.pg{border-radius:999px;height:46px;padding:0 20px;font-weight:600;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+.pb{background:#0b0b0c;color:#fff}.pw{background:#fff;color:#0b0b0c}.pg{background:#2c2c2f;color:#fff}.hero .pg{background:#ececef;color:#0b0b0c}.full{width:100%}
+.pb:active,.pw:active,.round:active{transform:scale(.97)}
+.round{width:40px;height:40px;border-radius:50%;background:#2c2c2f;display:grid;place-items:center;flex:none}.hero .round{background:#ececef;color:#0b0b0c}.round.sm{width:34px;height:34px}
+.ic{display:grid;place-items:center}
+.chip{border:1.5px solid #3a3a3f;color:#a8a8b0;border-radius:999px;padding:7px 13px;white-space:nowrap;font-weight:500;font-size:14px}.chip.on{background:#fff;color:#0b0b0c;border-color:#fff}
+.hero .chip{border-color:#d4d4d8;color:#55555c}.hero .chip.on{background:#0b0b0c;color:#fff;border-color:#0b0b0c}
+.item{padding:11px 0;border-bottom:1px solid #2c2c30;cursor:pointer}.item:last-child{border-bottom:0}
+.wd{width:36px;height:36px;border-radius:50%;border:1.5px solid #d4d4d8;font-weight:600;color:#55555c}.wd.on{background:#0b0b0c;color:#fff;border-color:#0b0b0c}.wdl{width:46px;font-weight:600;line-height:1.35}
+.thumb{width:42px;height:42px;border-radius:12px;background:#2c2c2f;display:grid;place-items:center;flex:none}
+.tag{background:#2c2c2f;border-radius:999px;padding:3px 10px;color:#b4b4bc;font-size:12px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;text-align:center}.cal>span{font-size:14px;color:#8e8e96}
+.cell{aspect-ratio:1;border-radius:11px;border:1.5px solid #34343a;display:grid;place-items:center;font-size:18px;font-weight:600}.cell.on{background:#fff;color:#0b0b0c;border-color:#fff}.cell.td{border-color:#b9b9c2}
+.big2{font-size:40px;font-weight:600;letter-spacing:-2px;line-height:1}
+.prog{height:8px;background:#e4e4e8;border-radius:5px;overflow:hidden}.prog i{display:block;height:100%;background:#0b0b0c;border-radius:5px}
+.th{display:grid;grid-template-columns:38px 1fr 1fr 52px 32px;margin:12px 0 0;color:#8e8e96;letter-spacing:1px;font-size:11px}
+.sr{display:grid;grid-template-columns:38px 1fr 1fr 52px 32px;align-items:center;margin-top:5px}.sr .mut{font-size:15px;padding-left:8px}
+.sr input{width:100%;background:none;border:0;font-size:20px;padding:4px 0;outline:0;font-weight:700}
+.ck{width:38px;height:38px;border-radius:50%;border:1.8px solid #4a4a50;color:transparent;display:grid;place-items:center}.ck.on{background:var(--ac);border-color:var(--ac);color:#0b0b0c}
+.dot{width:11px;height:11px;border-radius:50%;background:#5a5a62}.dot.on{background:#34c759}
+#nav{position:fixed;left:0;right:0;bottom:0;max-width:520px;margin:auto;padding:10px 12px calc(12px + var(--sf));background:#000;border-top:1px solid #1f1f22;z-index:10}
+.menu{width:100%;height:48px;border-radius:15px;background:#1c1c1e;color:#fff;padding:0 18px;font-size:17px;font-weight:500;display:flex;justify-content:space-between;align-items:center}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:flex-end;z-index:30}
+.mn,.sh{background:#1c1c1e;width:100%;max-width:520px;margin:auto;border-radius:28px 28px 0 0;padding:16px 12px calc(20px + var(--sf))}
+.mi{width:100%;display:flex;align-items:center;gap:16px;padding:12px 14px;border-radius:16px;font-size:19px;font-weight:500;color:#b4b4bc;text-align:left}.mi.on{background:#fff;color:#0b0b0c}
+.sh{padding:18px 16px calc(20px + var(--sf))}.sh label{display:block;color:#8e8e96;margin-top:12px;font-size:14px}.sh label>*{margin-top:6px;color:#fff}
+.sh input,.sh select,.hero select{width:100%;background:#2c2c2f;border:0;border-radius:14px;padding:10px;font-size:15px}.hero select{background:#ececef;color:#0b0b0c}
+.tk{display:flex;flex-direction:column;height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - var(--sf))}
+.num{font-size:40px;font-weight:600;line-height:1;letter-spacing:-2px}.lab{font-weight:600;letter-spacing:2px;font-size:11px}.cn{font-size:96px;font-weight:600;line-height:.95;letter-spacing:-5px}
+.stage{position:relative;flex:1;min-height:220px;margin:10px 0;border-radius:26px;background:#1c1c1e;overflow:hidden;touch-action:none;user-select:none}.stage canvas{position:absolute;inset:0;width:100%;height:100%}
+svg{max-width:100%}
+.trow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #2c2c30;font-size:14px}.trow:last-of-type{border-bottom:0}.trow b{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-weight:600}
+/* Tempo-Ringe */
+.gm{position:relative;background:#000;border-radius:22px;padding:12px;margin:8px 0;color:#f5f5f7;touch-action:none;user-select:none}
+.gm .pg{position:absolute;right:10px;top:8px;z-index:3;background:#2c2c2e;color:#f5f5f7}
+.gmain{display:grid;grid-template-columns:minmax(0,1fr) 52px 104px;gap:10px;align-items:center}
+.reps{font-size:62px;line-height:1;font-weight:600;letter-spacing:-.04em;color:#fff}.rl{font-size:11px;color:#86868b;margin-top:2px}
+.cue{font-size:17px;font-weight:600;letter-spacing:-.02em;margin-top:16px;color:#fff;min-height:21px}.sub{font-size:11px;color:#86868b;margin-top:2px;min-height:26px}
+.trk2{position:relative;width:52px;height:190px;border-radius:26px;background:#1c1c1e}.clip{position:absolute;inset:0;border-radius:26px;overflow:hidden}
+.fill{position:absolute;left:0;right:0;bottom:0;height:0;background:#2c2c2e}.zone{position:absolute;left:0;right:0;border-radius:26px;background:rgba(200,242,61,.28)}
+.pulse{position:absolute;left:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:#c8f23d;opacity:0}.pulse.top{top:26px}.pulse.bottom{top:164px}
+.knob{position:absolute;left:6px;top:144px;width:40px;height:40px;border-radius:50%;background:#fff}
+.rings{display:flex;flex-direction:column;align-items:center}.rings svg{width:104px;height:104px}.legend{font-size:10px;line-height:1.7;margin-top:6px;color:#86868b;width:104px}.legend div{display:flex;justify-content:space-between}.legend b{font-weight:400;color:#f5f5f7}
+.stage{background:linear-gradient(165deg,#222228,#141417);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07),inset 0 -40px 60px rgba(200,242,61,.03)}
+/* Spiel-Design: Neon-Gelb auf Dunkel */
+.pb{background:var(--ac);color:#0b0b0c;box-shadow:0 6px 18px rgba(200,242,61,.35)}.pw{background:var(--ac);color:#0b0b0c;box-shadow:0 6px 18px rgba(200,242,61,.22)}
+.chip.on,.hero .chip.on{background:var(--ac);color:#0b0b0c;border-color:var(--ac)}.wd.on{background:var(--ac);color:#0b0b0c;border-color:var(--ac)}
+.tabs .on{background:var(--ac);color:#0b0b0c}.av2{background:var(--ac);color:#0b0b0c}
+.prog i{background:var(--ac);box-shadow:0 0 10px rgba(200,242,61,.9)}
+.hero h1{display:inline-block;background:linear-gradient(transparent 62%,var(--ac) 62%);padding:0 3px;margin-left:-3px}
+.dk{background:radial-gradient(110% 70% at 100% 0%,rgba(200,242,61,.08),transparent 60%),#1c1c1e;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.dk .lbl{font-family:ui-monospace,"SF Mono",Menlo,monospace;text-transform:uppercase;letter-spacing:1.5px;font-size:11px}
+.dk .lbl:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ac);margin-right:8px;box-shadow:0 0 10px var(--ac);vertical-align:1px}
+.dk .big2{color:var(--ac)}.dk .thumb{color:var(--ac)}.dk .round{color:var(--ac)}.dk .item .mut svg{color:#6e6e76}
+.sr input:focus{color:var(--ac)}.tag{color:var(--ac)}
+.hero .big2{text-shadow:3px 3px 0 var(--ac)}.gtop .cn{text-shadow:3px 3px 0 var(--ac)}
+.gtop{position:sticky;top:0;z-index:5;background:#000;padding-top:calc(8px + env(safe-area-inset-top,0px));margin-top:calc(-8px - env(safe-area-inset-top,0px))}.gtop .hero{min-height:0}.gtop .cn{font-size:58px;letter-spacing:-3px;margin:0 8px}.gtop .stage{flex:none;height:170px;min-height:0;margin:8px 0}
+.dk.act{box-shadow:inset 0 0 0 1.5px var(--ac)}.sr.cur{background:rgba(200,242,61,.1);border-radius:12px}
+.cs{width:34px;height:34px;border-radius:50%;background:#ececef;color:#0b0b0c;display:grid;place-items:center;position:relative;flex:none}.cs:after{content:"";position:absolute;top:0;right:0;width:11px;height:11px;border-radius:50%;background:#ff6b6b;border:2px solid #fff}.cs.on:after{background:#34c759}
+.fab{position:fixed;right:14px;bottom:calc(92px + var(--sf));width:50px;height:50px;border-radius:50%;background:var(--ac);color:#0b0b0c;display:grid;place-items:center;z-index:12;box-shadow:0 6px 20px rgba(0,0,0,.5)}.fab.low{bottom:calc(24px + var(--sf))}.fab:before{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--ac);animation:fp 1.6s infinite}@keyframes fp{0%{transform:scale(.92);opacity:.7}100%{transform:scale(1.3);opacity:0}}.fab:active{transform:scale(.95)}
+.av2{width:56px;height:56px;border-radius:50%;background:#0b0b0c;color:#fff;display:grid;place-items:center;font-size:24px;font-weight:600;flex:none}
+.tabs{display:flex;gap:4px;background:#1c1c1e;border-radius:18px;padding:4px}.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 7px;border-radius:14px;color:#8e8e96;font-size:11px;font-weight:500}.tabs .on{background:#fff;color:#0b0b0c}
+</style></head><body>
+<div id="app"></div><div id="nav"></div>
+<script>
+const SVC="6e400001-b5a3-f393-e0a9-e50e24dcca9e",CHR="6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const mk=(n,type,s,r,mode)=>({n,type,s,r,mode:mode||"stack"}),COL=["#c8f23d","#ffd23f","#ff9ecb","#9db4ff"];
+const seed=()=>({rt:[{id:1,name:"Split",days:[
+ {id:11,name:"Arme Beine",wd:[0,4],ex:[mk("Beinpresse","Machine",3,8),mk("Beinbeuger","Machine",3,10),mk("Beinstrecker","Machine",3,10),mk("Bizeps Curl","Cable",3,10),mk("Trizeps Pushdown","Cable",3,10)]},
+ {id:12,name:"Torso",wd:[3,6],ex:[mk("Pec Deck","Machine",3,6,"arm"),mk("Lat Pulldown","Machine",3,6),mk("Bench Press","Plateloaded",3,6,"arm"),mk("Row","Plateloaded",3,6,"arm"),mk("Lateral Raise","Plateloaded",3,8,"arm"),mk("Enges Rudern","Cable",3,8)]}]}],
+ act:1,hist:[],rm:90,tu:2,td:2,rom:{},cur:null});
+let S=null,V={v:"today"},T=null,conn="",down=false,LP=0,E={init:0,gv:0,gp:0,st:0,th:0};
+try{S=JSON.parse(localStorage.getItem("rt3")||"null")}catch(e){}S=S||seed();S.rom=S.rom||{};S.rm=90;S.tu=2;S.td=3;
+const save=()=>{try{localStorage.setItem("rt3",JSON.stringify(S))}catch(e){}};
+try{const vb=navigator.vibrate&&navigator.vibrate.bind(navigator);Object.defineProperty(navigator,"vibrate",{value:p=>S.vib===0||!vb?false:vb(p),configurable:true})}catch(e){}
+const P={back:"M15 5l-7 7 7 7",x:"M6 6l12 12M18 6L6 18",grid:"M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z",list:"M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01",chart:"M6 20V10M12 20V4M18 20v-7",sensor:"M5 12a10 10 0 0 1 14 0M8 15a6 6 0 0 1 8 0M12 19h.01",dots:"M5 12h.01M12 12h.01M19 12h.01",plus:"M12 5v14M5 12h14",minus:"M5 12h14",arrow:"M7 17L17 7M8 7h9v9",check:"M5 13l4 4L19 7",chev:"M9 5l7 7-7 7",bell:"M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4",timer:"M12 8v5l3 2M12 3a9 9 0 1 0 .01 0M10 1h4",dumb:"M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12",user:"M16 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM4 21a8 8 0 0 1 16 0"};
+const I=(n,s=22,w=2.4)=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"><path d="${P[n]}"/></svg>`;
+const DE=["So","Mo","Di","Mi","Do","Fr","Sa"],WI=[1,2,3,4,5,6,0],WL="MDMDFSS";
+const rt=()=>S.rt.find(r=>r.id===S.act)||S.rt[0]||null,nsets=d=>d.ex.reduce((n,e)=>n+e.s,0),cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=s=>{s=Math.max(0,Math.floor(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")},mm=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+const key=d=>d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate(),todayDay=r=>r&&(r.days.find(d=>d.wd.includes(new Date().getDay()))||r.days[0]);
+function lastW(n){for(let i=S.hist.length-1;i>=0;i--){const e=S.hist[i].ex.find(x=>x.n===n);if(e){const s=e.sets.filter(z=>z.w>0).pop();if(s)return s.w}}return""}
+function beep(f){if(S.snd===0)return;try{const c=beep.c||(beep.c=new AudioContext()),o=c.createOscillator(),g=c.createGain();o.frequency.value=f;g.gain.value=.07;o.connect(g);g.connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.18);o.stop(c.currentTime+.2)}catch(e){}}
+/* ---------- Views ---------- */
+const hero=(c,x)=>`<section class="hero ${x||""}">${c}</section>`,dk=c=>`<section class="dk">${c}</section>`,th=()=>`<span class="thumb">${I("dumb",26)}</span>`;
+const bk=a=>`<button class="round" data-act="${a||"back"}">${I("back")}</button>`,vol=h=>Math.round(h.ex.reduce((t,x)=>t+x.sets.reduce((u,s)=>u+s.w*s.r,0),0));
+const dstr=t=>new Date(t).toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"});
+function nextDay(r){if(!r)return null;const t=new Date().getDay();for(let k=0;k<8;k++){const d=r.days.find(x=>x.wd.includes((t+k)%7));if(d)return[d,k]}return r.days[0]?[r.days[0],-1]:null}
+function gains(){const m={};S.hist.forEach(h=>h.ex.forEach(x=>{const b=Math.max(0,...x.sets.map(s=>s.w*(1+s.r/30)));(m[x.n]=m[x.n]||[]).push(b)}));return Object.entries(m).filter(([n,a])=>a.length>1).map(([n,a])=>[n,Math.round((a[a.length-1]-a[0])*10)/10]).sort((a,b)=>b[1]-a[1])}
+const QU=["Ganz hoch, ganz runter. Jede saubere Wiederholung zählt.","Konstanz schlägt Motivation.","Heute ein bisschen besser als gestern.","Der erste Satz ist der schwerste, danach läuft es."];
+function vToday(){const r=rt(),nd=nextDay(r),d=nd&&nd[0],k=nd?nd[1]:-1,t=new Date().getDay(),n=new Date(),st=new Date(n);st.setDate(n.getDate()-((t+6)%7)-7);
+ const act=new Set(S.hist.map(h=>key(new Date(h.t))));let cells="",cnt=0;
+ for(let i=0;i<14;i++){const c=new Date(st);c.setDate(st.getDate()+i);const on=act.has(key(c));if(on)cnt++;cells+=`<div class="cell ${on?"on":""} ${key(c)===key(n)?"td":""}">${c.getDate()}</div>`}
+ const c=S.cur,head=`<div class="row sp" style="margin-bottom:18px"><span class="mut" style="font-size:16px">${c?"Aktuelles Workout":"Nächstes Workout"}</span>${r?`<span class="chip">${esc(r.name)}</span>`:""}</div>`;let body;
+ if(c){const tot=c.ex.reduce((a,e)=>a+e.sets.length,0),dn=c.ex.reduce((a,e)=>a+e.sets.filter(s=>s.d).length,0);body=`<h1>${esc(c.name)}</h1><p class="mut">${dn} von ${tot} Sätzen erledigt</p><div style="margin-top:28px"><button class="pb full" data-act="resume">Training fortsetzen</button></div>`}
+ else if(d)body=`<h1>${esc(d.name)}</h1><p class="mut" style="margin:8px 0 2px">${nsets(d)} Sätze · ${d.ex.length} Übungen</p><p class="mut" style="margin:0">${k===0?"Heute geplant":k>0?"Geplant: "+(k===1?"Morgen":DE[(t+k)%7]):"Nicht eingeplant"}</p><p style="margin:16px 0 26px;color:#3a3a40">${d.ex.slice(0,4).map(e=>esc(e.n)).join(" · ")}${d.ex.length>4?" …":""}</p><div class="row"><button class="pb" style="flex:1" data-act="start1" data-d="${d.id}">Workout starten</button><button class="round" data-act="prev" data-d="${d.id}">${I("arrow",22)}</button></div>`;
+ else body=`<h1>Keine Routine</h1><p class="mut">Lege eine Routine mit Trainingstagen an.</p><button class="pb" data-act="goto" data-v="routines">Routinen öffnen</button>`;
+ const g=gains().slice(0,3),lw=S.hist.slice(-3).reverse();
+ const saved=S.rt.flatMap(x=>x.days.map(d=>({x,d})));
+ return hero(head+body)+dk(`<div class="row sp" style="margin-bottom:4px"><span class="lbl mut" style="margin:0">Gespeicherte Workouts</span><span class="mut" style="font-size:12px">${cnt} aktive Tage</span></div>${saved.length?saved.map(({x,d})=>`<div class="row item" data-act="prev" data-d="${d.id}" data-r="${x.id}">${th()}<div style="flex:1"><b style="font-size:16px">${esc(d.name)}</b><div class="mut" style="font-size:13px">${esc(x.name)} · ${d.ex.length} Übungen · ${nsets(d)} Sätze</div></div><button class="round" data-act="start1" data-d="${d.id}" data-r="${x.id}">${I("arrow",18)}</button></div>`).join(""):`<p class="mut" style="margin:0">Lege in den Routinen Trainingstage an, dann erscheinen sie hier.</p>`}<p class="mut" style="margin:12px 0 0;font-size:13px">${QU[n.getDate()%QU.length]}</p>`)
+ +dk(`<div class="lbl mut">Steigerungen</div>${g.length?g.map(([nm,v])=>`<div class="row sp item" style="cursor:default"><b>${esc(nm)}</b><b style="color:${v>=0?"var(--ac)":"#ff6b6b"}">${v>=0?"+":""}${v} kg</b></div>`).join(""):`<p class="mut" style="margin:0">Nach dem zweiten Training siehst du hier deine Steigerungen.</p>`}<div class="lbl mut" style="margin-top:24px">Letzte Workouts</div>${lw.length?lw.map(h=>`<div class="row sp item" style="cursor:default"><div><b>${esc(h.name)}</b><div class="mut" style="font-size:15px">${dstr(h.t)}</div></div><span class="mut">${vol(h)} kg</span></div>`).join(""):`<p class="mut" style="margin:0">Noch keine Trainings.</p>`}`)}
+function vRoutines(){const r=rt();return hero(`<div class="mut" style="margin-bottom:18px">Meine Routinen</div><h1>Routinen</h1><p class="mut">Aktiv: ${esc(r?r.name:"–")}</p><div style="margin-top:26px"><button class="pb full" data-act="newr">Neue Routine</button></div>`)
+ +dk(S.rt.length?S.rt.map(x=>`<div class="row item" data-act="rtn" data-r="${x.id}"><span class="thumb">${I("list",24)}</span><div style="flex:1"><b style="font-size:17px">${esc(x.name)}</b><div class="mut">${x.days.length} Tage · ${x.days.reduce((a,d)=>a+d.ex.length,0)} Übungen</div></div>${x.id===S.act?`<span class="chip on">Aktiv</span>`:`<span class="mut">${I("chev")}</span>`}</div>`).join(""):`<p class="mut" style="margin:0">Noch keine Routine.</p>`)}
+function vRoutine(){const r=S.rt.find(x=>x.id===V.rid);return hero(`<div class="row sp">${bk()}<button class="round" data-act="delr">${I("dots")}</button></div><h1 style="margin-top:22px">${esc(r.name)}</h1><p class="mut">${r.days.length} Tage · ${r.days.reduce((a,d)=>a+d.ex.length,0)} Übungen</p><div style="margin-top:22px"><button class="pb full" data-act="setact">${S.act===r.id?"Aktiv entfernen":"Aktiv setzen"}</button></div>`)
+ +dk(`<div class="row sp" style="margin-bottom:6px"><span class="mut">Tage</span><button class="chip on" data-act="addd">+ Workout hinzufügen</button></div>${r.days.map(d=>`<div class="row item" data-act="dayv" data-d="${d.id}"><div class="wdl mut">${WI.filter(w=>d.wd.includes(w)).map(w=>DE[w]).join("<br>")||"–"}</div><div style="flex:1"><h3>${esc(d.name)}</h3><div class="mut">${d.ex.length} Übungen</div></div><span class="mut">${I("chev")}</span></div>`).join("")}`)}
+function vDay(){const r=S.rt.find(x=>x.id===V.rid),d=r.days.find(x=>x.id===V.did);return hero(`${bk()}<h1 style="margin-top:22px">${esc(d.name)}</h1><p class="mut" style="margin:8px 0 16px">Zeitplan: ${WI.filter(w=>d.wd.includes(w)).map(w=>DE[w]).join(", ")||"nicht geplant"}</p><div class="row sp" style="gap:4px">${WI.map((w,i)=>`<button class="wd ${d.wd.includes(w)?"on":""}" data-act="wd" data-w="${w}">${WL[i]}</button>`).join("")}</div>`)
+ +dk(`<div class="lbl mut">Übungen</div>${d.ex.map((e,i)=>`<div class="row item" data-act="exed" data-i="${i}">${th()}<div style="flex:1"><b style="font-size:17px">${esc(e.n)}</b><div class="row" style="gap:10px;margin-top:6px"><span class="tag">${esc(e.type)}</span><span class="mut">${e.s} × ${e.r}</span></div></div><span class="mut">${I("dots")}</span></div>`).join("")}<div style="margin-top:20px"><button class="pw full" data-act="addex">${I("plus",22)} Übung hinzufügen</button></div>`)}
+function vPrev(){const r=S.rt.find(x=>x.id===V.rid)||rt(),d=r.days.find(x=>x.id===V.did);return hero(`<div class="row sp"><span class="mut">${esc(r.name)}</span><button class="round" data-act="back">${I("x")}</button></div><h1 style="margin:16px 0 22px">${esc(d.name)}</h1><div class="row" style="gap:40px;margin-bottom:26px"><div><div class="big2">${nsets(d)}</div><div class="mut">Sätze</div></div><div><div class="big2">${d.ex.length}</div><div class="mut">Übungen</div></div></div><button class="pb full" data-act="start">Workout starten</button><div class="mut ctr" style="margin-top:16px;cursor:pointer" data-act="chg">Trainingstag wechseln</div>`)
+ +dk(d.ex.map(e=>`<div class="row item" style="cursor:default">${th()}<b style="flex:1;font-size:16px">${esc(e.n)}</b><span class="mut">${e.s} × ${e.r}</span></div>`).join(""))}
+function vWork(){const c=S.cur,tot=c.ex.reduce((n,e)=>n+e.sets.length,0),dn=c.ex.reduce((n,e)=>n+e.sets.filter(s=>s.d).length,0);
+ return hero(`<div class="row sp"><button class="round" data-act="cancel">${I("x")}</button><span class="pg mono" id="rest" style="visibility:hidden;height:36px;padding:0 12px;font-size:14px">Pause</span><div class="row" style="gap:8px"><button class="pg" style="height:36px;padding:0 12px" data-act="rl">${I("timer",20)}${fmt(c.rl)}</button><button class="pb" style="height:36px;padding:0 16px" data-act="fin">Beenden</button></div></div><h1 style="margin-top:22px">${esc(c.name)}</h1><div class="mono mut" id="el" style="margin:8px 0 16px">0:00</div><div class="prog"><i style="width:${tot?dn/tot*100:0}%"></i></div>`)
+ +c.ex.map((e,ei)=>dk(`<div class="row">${th()}<div style="flex:1"><b style="font-size:17px">${esc(e.n)}</b><div class="mut">${esc(e.type)}</div></div><button class="round" data-act="trk" data-e="${ei}">${I("sensor",24,2)}</button></div><div class="th"><span>SATZ</span><span>KG</span><span>WDH</span><span></span><span></span></div>
+ ${e.sets.map((s,si)=>`<div class="sr"><span class="mut">${si+1}</span><input type="number" inputmode="decimal" value="${s.w}" data-f="w" data-e="${ei}" data-s="${si}"><input type="number" inputmode="numeric" value="${s.r}" data-f="r" data-e="${ei}" data-s="${si}"><button class="ck ${s.d?"on":""}" data-act="ck" data-e="${ei}" data-s="${si}">${I("check",24,3)}</button><button class="ic mut" data-act="ds" data-e="${ei}" data-s="${si}">${I("dots",22)}</button></div>`).join("")}
+ <div class="row mut" style="justify-content:center;padding:18px 0 2px;cursor:pointer" data-act="as" data-e="${ei}">${I("plus",24)}<span>Satz hinzufügen</span></div>`)).join("")}
+function vTrack(){const e=T.ex,hint="Befestigen: Mit dem Magneten am Gewichtsstapel oder am Hebelarm nahe den Griffen. Die App erkennt die Bewegung selbst.";
+ return `<div class="tk">`+hero(`<div class="row sp"><button class="round" data-act="tx">${I("x")}</button><b class="mono" id="tm" style="font-size:19px">00:00</b><button class="pg" style="height:34px;padding:0 12px;font-size:13px" data-act="conn" id="cs">Keine Verbindung</button></div>
+ <div class="row sp" style="margin-top:12px;align-items:flex-start"><div><div class="num">${T.si+1}.</div><div class="lab" style="margin-top:4px">SATZ</div></div><div class="cn" id="cnt">0</div><div class="ctr"><div class="num" id="kg" style="font-size:34px">${T.kg}</div><div class="row" style="gap:8px;margin-top:8px"><button class="round sm" data-act="kgm">${I("minus",20)}</button><b class="lab">KG</b><button class="round sm" data-act="kgp">${I("plus",20)}</button></div></div></div>
+ <div class="lab ctr" style="margin-top:4px">WIEDERHOLUNGEN <span class="mut" style="font-weight:400">von ${T.target}</span></div><p class="ctr" id="msg" style="margin:8px 0 2px;font-weight:600"></p><p class="ctr mut" style="margin:0;font-size:13px">${hint}</p>`,"sm")
+ +`<div class="stage" id="trk"><canvas id="cv"></canvas></div><div class="row"><button class="pg" style="height:48px" data-act="rom" id="ms">Bereit</button><button class="pw" style="flex:1;height:48px" data-act="go" id="go">Satz starten</button></div></div>`}
+function vStats(){const names=[...new Set(S.hist.flatMap(h=>h.ex.map(x=>x.n)))];if(!V.pe||!names.includes(V.pe))V.pe=names[0]||"";
+ const pts=S.hist.map(h=>{let m=0;h.ex.filter(x=>x.n===V.pe).forEach(x=>x.sets.forEach(s=>{m=Math.max(m,s.w*(1+s.r/30))}));return m}).filter(v=>v>0);let svg="",pr=0,prs=null;
+ S.hist.forEach(h=>h.ex.filter(x=>x.n===V.pe).forEach(x=>x.sets.forEach(s=>{if(s.w*(1+s.r/30)>pr){pr=s.w*(1+s.r/30);prs=s}})));
+ if(pts.length){const mx=Math.max(...pts)*1.1,mn=Math.min(...pts)*.9,xy=(v,i)=>[14+i*272/Math.max(1,pts.length-1),126-(v-mn)/(mx-mn||1)*112];svg=`<svg viewBox="0 0 300 140" style="margin-top:14px"><polyline fill="none" stroke="#0b0b0c" stroke-width="3" points="${pts.map((v,i)=>xy(v,i).join(",")).join(" ")}"/>${pts.map((v,i)=>{const[x,y]=xy(v,i);return`<circle cx="${x}" cy="${y}" r="5" fill="#0b0b0c"/>`}).join("")}</svg>`}
+ const g=gains();return hero(`<div class="mut" style="margin-bottom:18px">Geschätztes 1RM</div><h1 style="margin-bottom:16px">Fortschritt</h1>${names.length?`<select id="pe">${names.map(n=>`<option ${n===V.pe?"selected":""}>${esc(n)}</option>`).join("")}</select>${svg}${prs?`<p style="margin:12px 0 0"><b>PR:</b> ${prs.w} kg × ${prs.r}</p>`:""}`:`<p class="mut">Schließe ein Training ab, dann siehst du hier deine Kurven.</p>`}`)
+ +dk(`<div class="lbl mut">Steigerungen</div>${g.length?g.map(([nm,v])=>`<div class="row sp item" style="cursor:default"><b>${esc(nm)}</b><b style="color:${v>=0?"var(--ac)":"#ff6b6b"}">${v>=0?"+":""}${v} kg</b></div>`).join(""):`<p class="mut" style="margin:0">Noch zu wenig Daten.</p>`}`)}
+function vTracker(){const ch=(k,arr,u)=>arr.map(x=>`<button class="chip ${S[k]===x?"on":""}" data-act="${k}" data-x="${x}">${x}${u}</button>`).join("");
+ return hero(`<div class="row sp" style="margin-bottom:18px"><span class="mut">Sensor</span><span class="row" style="gap:8px"><span class="dot ${conn?"on":""}"></span><span class="mut">${conn?"Verbunden mit "+esc(conn):"Nicht verbunden"}</span></span></div><h1>Tracker</h1><p class="mut">Android/PC: Chrome. iPhone: Browser „Bluefy“.</p><div style="margin-top:18px"><button class="pb full" data-act="conn">Mit Tracker verbinden</button></div>`)
+ +dk(`<div class="lbl mut">Mindest-Umfang (eGym-Prinzip)</div><p class="mut" style="margin-top:0">Eine Wiederholung zählt erst, wenn dieser Anteil des gemessenen Bewegungswegs erreicht wird, oben und unten.</p><div class="row" style="gap:8px">${ch("rm",[80,90,95]," %")}</div>`)
+ +dk(`<div class="lbl mut">Tempo der Kurve</div><p class="mut" style="margin-top:0">Hoch (Anheben)</p><div class="row" style="gap:8px">${ch("tu",[1,2,3,4]," s")}</div><p class="mut">Runter (Ablassen, länger = Negativ-Training)</p><div class="row" style="gap:8px">${ch("td",[1,2,3,4,5]," s")}</div>`)
+ +dk(`<div class="lbl mut">Messung pro Gerät</div><p class="mut" style="margin:0">Gewichtsstapel: Tracker mit Magnet am Stapel, gemessen wird die vertikale Bewegung. Hebelarm (z. B. Pec Deck, Bench Press): Tracker am Arm nahe den Griffen, gemessen wird der Winkel. Das driftet nicht und ist genauer. Stelle es pro Übung ein.</p><div style="margin-top:18px"><button class="pg full" data-act="reset">Alle Daten löschen</button></div>`)}
+function vHist(){const tv=S.hist.reduce((a,h)=>a+vol(h),0),l=S.hist[S.hist.length-1];
+ return hero(`<div class="mut" style="margin-bottom:18px">Alle Trainings</div><h1>Verlauf</h1><div class="row" style="gap:40px;margin-top:22px"><div><div class="big2">${S.hist.length}</div><div class="mut">Workouts</div></div><div><div class="big2">${Math.round(tv/1000*10)/10}</div><div class="mut">Tonnen bewegt</div></div></div>${l?`<p class="mut" style="margin:18px 0 0">Zuletzt: ${esc(l.name)}, ${dstr(l.t)}</p>`:""}`)
+ +dk(S.hist.length?S.hist.slice().reverse().map(h=>`<div class="item" style="cursor:default"><div class="row sp"><b style="font-size:16px">${esc(h.name)}</b><span class="mut">${dstr(h.t)} · ${fmt(h.dur)} min</span></div><div class="mut" style="margin:4px 0 6px">${vol(h)} kg Volumen</div>${h.ex.map(x=>`<div class="mut" style="font-size:15px">${esc(x.n)}: ${x.sets.map(s=>s.w+"×"+s.r).join(", ")}</div>`).join("")}</div>`).join(""):`<p class="mut" style="margin:0">Noch keine Trainings.</p>`)}
+function vAcct(){const tv=S.hist.reduce((a,h)=>a+vol(h),0),nm=S.name||"Athlet",df={step:2.5,rl:150,snd:1,vib:1},
+ ch=(k,arr,u)=>arr.map(x=>`<button class="chip ${(S[k]===undefined?df[k]:S[k])===x?"on":""}" data-act="set" data-k="${k}" data-x="${x}">${u(x)}</button>`).join(""),
+ rows=S.hist.length?S.hist.slice().reverse().map(h=>`<div class="item" style="cursor:default"><div class="row sp"><b style="font-size:16px">${esc(h.name)}</b><span class="mut" style="font-size:13px">${dstr(h.t)} · ${fmt(h.dur)} min</span></div><div class="mut" style="margin:3px 0 4px;font-size:13px">${vol(h)} kg Volumen</div>${h.ex.map(x=>`<div class="mut" style="font-size:13px">${esc(x.n)}: ${x.sets.map(s=>s.w+"×"+s.r).join(", ")}</div>`).join("")}</div>`).join(""):`<p class="mut" style="margin:0">Noch keine Trainings.</p>`;
+ return hero(`<div class="mut" style="margin-bottom:16px">Konto</div><div class="row" style="gap:14px"><div class="av2">${esc(nm[0].toUpperCase())}</div><div><h1 style="font-size:26px">${esc(nm)}</h1><div class="mut">Daten lokal auf diesem Gerät</div></div></div><div class="row" style="gap:30px;margin:18px 0"><div><div class="big2" style="font-size:28px">${S.hist.length}</div><div class="mut">Workouts</div></div><div><div class="big2" style="font-size:28px">${Math.round(tv/100)/10}</div><div class="mut">Tonnen</div></div><div><div class="big2" style="font-size:28px">${S.rt.length}</div><div class="mut">Routinen</div></div></div><button class="pb full" data-act="name">Name ändern</button>`)
+ +dk(`<div class="row sp" style="margin-bottom:12px"><span class="lbl mut" style="margin:0">Tracker</span><span class="row" style="gap:8px"><span class="dot ${conn?"on":""}"></span><span class="mut" style="font-size:13px">${conn?"Verbunden mit "+esc(conn):"Nicht verbunden"}</span></span></div><button class="pw full" data-act="conn">Mit Tracker verbinden</button><button class="pg full" style="margin-top:8px" data-act="goto" data-v="test">Tracker testen</button><p class="mut" style="margin:12px 0 0;font-size:13px">Android/PC: Chrome. iPhone: Browser „Bluefy“. Den Bewegungsumfang jedes Geräts misst die App beim ersten Satz selbst ein und misst nur die Hoch-und-runter-Bewegung. Drehungen werden ignoriert.</p><div style="margin-top:12px"><button class="pg full" data-act="romreset">Messungen zurücksetzen</button></div>`)
+ +dk(`<div class="lbl mut">Training</div><p class="mut" style="margin:0 0 8px">Gewichtsschritt (+/− im Tracker)</p><div class="row" style="gap:8px;flex-wrap:wrap">${ch("step",[1,2.5,5],x=>x+" kg")}</div><p class="mut" style="margin:14px 0 8px">Standard-Pause</p><div class="row" style="gap:8px;flex-wrap:wrap">${ch("rl",[60,90,120,150,180],x=>fmt(x))}</div><div style="margin-top:16px"></div>`)
+ +dk(`<div class="lbl mut">Feedback</div><div class="row sp" style="margin-bottom:10px"><span>Ton</span><div class="row" style="gap:8px">${ch("snd",[1,0],x=>x?"An":"Aus")}</div></div><div class="row sp"><span>Vibration</span><div class="row" style="gap:8px">${ch("vib",[1,0],x=>x?"An":"Aus")}</div></div>`)
+ +dk(`<div class="lbl mut">Daten</div><p class="mut" style="margin:0 0 12px">Sichere deine Daten oder übertrage sie auf ein anderes Gerät.</p><div class="row" style="gap:8px"><button class="pg" style="flex:1" data-act="exp">Exportieren</button><button class="pg" style="flex:1" data-act="imp">Importieren</button></div><div style="margin-top:8px"><button class="pg full" style="color:#ff6b6b" data-act="reset">Alle Daten löschen</button></div>`)
+ +dk(`<div class="lbl mut">Verlauf</div>${rows}`)}
+function newT(ei,add){const e=S.cur.ex[ei];let si=e.sets.findIndex(s=>!s.d);if(si<0){if(add||!e.sets.length){const l=e.sets[e.sets.length-1];e.sets.push({w:l?l.w:"",r:e.t,d:0})}si=e.sets.length-1}
+ const s=e.sets[si];T={ei,si,ex:e,kg:+s.w||0,target:+s.r||e.t,run:false,cal:false,reps:0,pos:0,sim:0,up:0,pk:0,t0:0,te:0,fin:false,rmax:0,tgt:1,msg:"",pts:0,k:0,hits:[],tr:[],qs:[],low:0,tpk:0,go:Infinity}}
+function initT(){if(T&&S.cur.ex.includes(T.ex))return;const ei=S.cur.ex.findIndex(e=>e.sets.some(s=>!s.d));newT(ei<0?0:ei,false)}
+function nextAfter(){const c=S.cur,n=c.ex.length;for(let k=0;k<n;k++){const ei=(T.ei+k)%n;if(c.ex[ei].sets.some(s=>!s.d)){newT(ei,false);return}}newT(T.ei,false)}
+function selectEx(ei){if(T&&T.run){alert("Beende zuerst den laufenden Satz.");return}newT(ei,false);V.v="workout";R()}
+function vWork2(){const c=S.cur;initT();const tot=c.ex.reduce((n,e)=>n+e.sets.length,0),dn=c.ex.reduce((n,e)=>n+e.sets.filter(s=>s.d).length,0),e=T.ex;
+ return `<div class="gtop">`+hero(`<div class="row sp"><button class="round" data-act="cancel">${I("x")}</button><div style="flex:1;min-width:0"><b style="font-size:17px">${esc(c.name)}</b><div class="mono mut" id="el" style="font-size:12px">0:00</div></div><button class="cs" id="cs" data-act="conn">${I("sensor",18,2)}</button><button class="pb" style="height:38px;padding:0 16px;font-size:15px" data-act="fin">Beenden</button></div><div class="prog" style="margin:10px 0;height:4px"><i style="width:${tot?dn/tot*100:0}%"></i></div>
+ <div class="row sp"><div style="min-width:0;flex:1"><b style="font-size:17px">${esc(e.n)}</b><div class="mut" style="font-size:12px">Satz ${T.si+1} von ${e.sets.length} · Ziel ${T.target} · <span class="mono" id="tm">00:00</span></div></div><div class="cn" id="cnt">0</div><div class="ctr"><div class="num" id="kg" style="font-size:26px">${T.kg}</div><div class="row" style="gap:6px;margin-top:4px"><button class="round sm" data-act="kgm">${I("minus",18)}</button><b class="lab">KG</b><button class="round sm" data-act="kgp">${I("plus",18)}</button></div></div></div>
+ <div class="row sp" style="margin-top:8px;gap:8px"><span id="msg" style="flex:1;font-size:13px;font-weight:600"></span><span class="pg mono" id="rest" style="visibility:hidden;height:30px;padding:0 12px;font-size:13px">Pause</span></div>
+ <div class="stage" id="trk"><canvas id="cv"></canvas></div>
+ <div class="row"><button class="pg" style="height:44px;font-size:14px" data-act="rom" id="ms">Bereit</button><button class="pb" style="flex:1;height:44px" data-act="go" id="go">Satz starten</button></div>`,"sm")+`</div>`
+ +c.ex.map((x,ei)=>`<section class="dk ${ei===T.ei?"act":""}"><div class="row">${th()}<div style="flex:1"><b style="font-size:17px">${esc(x.n)}</b><div class="mut">${esc(x.type)}</div></div><button class="round" data-act="trk" data-e="${ei}">${I("sensor",20,2)}</button></div><div class="th"><span>SATZ</span><span>KG</span><span>WDH</span><span></span><span></span></div>
+ ${x.sets.map((s,si)=>`<div class="sr ${ei===T.ei&&si===T.si?"cur":""}"><span class="mut">${si+1}</span><input type="number" inputmode="decimal" value="${s.w}" data-f="w" data-e="${ei}" data-s="${si}"><input type="number" inputmode="numeric" value="${s.r}" data-f="r" data-e="${ei}" data-s="${si}"><button class="ck ${s.d?"on":""}" data-act="ck" data-e="${ei}" data-s="${si}">${I("check",20,3)}</button><button class="ic mut" data-act="ds" data-e="${ei}" data-s="${si}">${I("dots",20)}</button></div>`).join("")}
+ <div class="row mut" style="justify-content:center;padding:14px 0 2px;cursor:pointer" data-act="as" data-e="${ei}">${I("plus",20)}<span>Satz hinzufügen</span></div></section>`).join("")}
+const histU=()=>{const seen={},o=[];S.hist.slice().reverse().forEach(h=>{if(!seen[h.name]){seen[h.name]=1;o.push(h)}});return o};
+function daySheet(){const mine=S.rt.flatMap(x=>x.days.map(d=>({x,d}))),hs=histU();
+ return `<div class="ov"><div class="sh" style="max-height:86vh;overflow:auto"><h2>Workout hinzufügen</h2><button class="pw full" style="margin:14px 0 4px" data-act="dnew">Neuen Tag anlegen</button>
+ <div class="lbl mut" style="margin-top:18px">Bestehende Workouts</div>${mine.length?mine.map(({x,d})=>`<div class="row item" data-act="dpick" data-r="${x.id}" data-d="${d.id}">${th()}<div style="flex:1"><b>${esc(d.name)}</b><div class="mut" style="font-size:13px">${esc(x.name)} · ${d.ex.length} Übungen · ${nsets(d)} Sätze</div></div><span class="mut">${I("plus",22)}</span></div>`).join(""):`<p class="mut" style="margin:0">Noch keine gespeicherten Workouts.</p>`}
+ ${hs.length?`<div class="lbl mut" style="margin-top:18px">Absolvierte Workouts</div>`+hs.map((h,i)=>`<div class="row item" data-act="dhist" data-i="${i}">${th()}<div style="flex:1"><b>${esc(h.name)}</b><div class="mut" style="font-size:13px">${dstr(h.t)} · ${h.ex.length} Übungen</div></div><span class="mut">${I("plus",22)}</span></div>`).join(""):""}
+ <button class="pg full" style="margin-top:16px" data-act="dx">Abbrechen</button></div></div>`}
+const ease=x=>(1-Math.cos(Math.PI*x))/2,HW=.12,TH=190,KD=40,TR=TH-KD-12,RC=[70,54,38].map(r=>2*Math.PI*r),pl=(el,f)=>{el.style.transform="scale("+(1+(1-f)*1.5).toFixed(3)+")";el.style.opacity=(f*f*.55).toFixed(3)};
+function tgt(t){const tu=S.tu,td=S.td,u=(((t%(tu+td+1))+(tu+td+1))%(tu+td+1));return u<tu?ease(u/tu):u<tu+.5?1:u<tu+.5+td?1-ease((u-tu-.5)/td):0}
+function cueOf(t){const tu=S.tu,td=S.td,u=(((t%(tu+td+1))+(tu+td+1))%(tu+td+1));if(u<tu)return["Drücken",tu+" Sekunden, gleichmäßig"];if(u<tu+.5)return["Halten","Kurz oben bleiben"];if(u<tu+.5+td)return["Langsam ablassen",td+" Sekunden, nicht fallen lassen"];return["Bereit","Nächste Wiederholung"]}
+const ringSet=(id,v,c)=>$(id).setAttribute("stroke-dasharray",(cl(v,0,1)*c).toFixed(1)+" "+(c+10));
+function loop(){const id=++LP;let lt=performance.now();const f=now=>{if(id!==LP||V.v!=="workout"||!$("knob"))return;const dt=Math.min(.05,(now-lt)/1000);lt=now;
+ if(!conn){T.sim=cl(T.sim+(down?dt/S.tu:-dt/S.td),0,1);if(T.run&&!T.cal)stepPos(T.sim,now);T.pos=T.sim}
+ const act=T.run&&!T.cal,t=act&&isFinite(T.go)?(now-T.go)/1000:-1,live=act&&t>=0&&!T.fin,h=cl(T.pos,0,1),g=live&&!T.wait?tgt(t):0;
+ T.fT=Math.max(0,(T.fT||0)-dt*1.8);T.fB=Math.max(0,(T.fB||0)-dt*1.8);
+ if(live){if(!T.wait){T.tt=(T.tt||0)+dt;if(Math.abs(h-g)<HW)T.ti=(T.ti||0)+dt}if(h>=.9&&!T.aT){T.aT=1;T.fT=1}if(h<.75)T.aT=0;if(h<=.12&&!T.aB){T.aB=1;T.fB=1}if(h>.25)T.aB=0}
+ const ky=(1-h)*TR+6;$("knob").style.top=ky.toFixed(1)+"px";$("fill").style.height=(TH-ky-KD/2).toFixed(1)+"px";
+ const bh=2*HW*TR+KD*.5,cy=(1-g)*TR+6+KD/2;$("zone").style.top=(cy-bh/2).toFixed(1)+"px";$("zone").style.height=bh.toFixed(1)+"px";pl($("ptop"),T.fT);pl($("pbot"),T.fB);
+ $("knob").style.background=!live?"#fff":(Math.abs(h-g)<HW?"#c8f23d":"#ffb62e");
+ const pks=T.pks||[],acc=T.tt>0?T.ti/T.tt:0,pk=pks.length?pks.reduce((a,b)=>a+b,0)/pks.length:0;$("reps").textContent=T.reps;
+ ringSet("r1",T.reps/T.target,RC[0]);ringSet("r2",acc,RC[1]);ringSet("r3",pk,RC[2]);$("v1").textContent=T.reps+" / "+T.target;$("v2").textContent=T.tt>0?Math.round(acc*100)+" %":"–";$("v3").textContent=pks.length?Math.round(pk*100)+" %":"–";
+ let c1="Bereit",c2="Ziel: "+T.target+" saubere Wdh.";
+ if(T.fin){c1="Satz geschafft";c2=T.msg||""}else if(T.run&&now<T.t1+1500){c1="Ruhig halten";c2="Die Ausrichtung wird erkannt"}else if(T.cal&&T.run){c1="Einmessen";c2="Einmal ganz hoch und ganz runter (mind. 10 cm)"}else if(act&&t<0){c1=String(Math.ceil(-t));c2="Gleich geht’s los"}else if(live){const q=cueOf(t);c1=q[0];c2=T.msg||q[1]}else if(T.msg)c2=T.msg;
+ $("cue").textContent=c1;$("sub").textContent=c2;
+ $("tm").textContent=T.t0?mm(((T.run?Date.now():T.te||Date.now())-T.t0)/1000):"00:00";$("cs").className="cs"+(conn?" on":"");
+ $("go").textContent=T.fin?"Satz speichern":T.run?"Satz beenden":"Satz starten";$("ms").textContent=T.run?(T.cal?"Kalibriert …":"Misst …"):T.fin?"Fertig":"Bereit";requestAnimationFrame(f)};requestAnimationFrame(f)}
+function vWork3(){const c=S.cur;initT();const tot=c.ex.reduce((n,e)=>n+e.sets.length,0),dn=c.ex.reduce((n,e)=>n+e.sets.filter(s=>s.d).length,0),e=T.ex;
+ return `<div class="gtop">`+hero(`<div class="row sp"><button class="round" data-act="cancel">${I("x")}</button><div style="flex:1;min-width:0"><b style="font-size:17px">${esc(c.name)}</b><div class="mono mut" id="el" style="font-size:12px">0:00</div></div><button class="cs" id="cs" data-act="conn">${I("sensor",18,2)}</button><button class="pb" style="height:38px;padding:0 16px;font-size:15px" data-act="fin">Beenden</button></div><div class="prog" style="margin:10px 0;height:4px"><i style="width:${tot?dn/tot*100:0}%"></i></div>
+ <div class="row sp"><div style="min-width:0;flex:1"><b style="font-size:16px">${esc(e.n)}</b><div class="mut" style="font-size:12px">Satz ${T.si+1} von ${e.sets.length} · <span class="mono" id="tm">00:00</span></div></div><div class="row" style="gap:6px"><button class="round sm" data-act="kgm">${I("minus",18)}</button><b class="mono" style="font-size:16px;min-width:62px;text-align:center"><span id="kg">${T.kg}</span> kg</b><button class="round sm" data-act="kgp">${I("plus",18)}</button></div></div>
+ <div class="gm" id="trk"><span class="pg mono" id="rest" style="visibility:hidden;height:26px;padding:0 10px;font-size:12px">Pause</span><div class="gmain"><div><div class="reps" id="reps">0</div><div class="rl">von ${T.target} Wiederholungen</div><div class="cue" id="cue">Bereit</div><div class="sub" id="sub"></div></div>
+ <div><div class="trk2"><div class="clip"><div class="fill" id="fill"></div><div class="zone" id="zone"></div></div><div class="pulse top" id="ptop"></div><div class="pulse bottom" id="pbot"></div><div class="knob" id="knob"></div></div></div>
+ <div class="rings"><svg viewBox="0 0 160 160"><g fill="none" stroke-width="13" transform="rotate(-90 80 80)"><circle cx="80" cy="80" r="70" stroke="#c8f23d" stroke-opacity=".22"/><circle id="r1" cx="80" cy="80" r="70" stroke="#c8f23d" stroke-linecap="round" stroke-dasharray="0 450"/><circle cx="80" cy="80" r="54" stroke="#ffd60a" stroke-opacity=".22"/><circle id="r2" cx="80" cy="80" r="54" stroke="#ffd60a" stroke-linecap="round" stroke-dasharray="0 350"/><circle cx="80" cy="80" r="38" stroke="#f5f5f7" stroke-opacity=".22"/><circle id="r3" cx="80" cy="80" r="38" stroke="#f5f5f7" stroke-linecap="round" stroke-dasharray="0 250"/></g></svg>
+ <div class="legend"><div><span style="color:#c8f23d">Wdh.</span><b id="v1">0</b></div><div><span style="color:#ffd60a">Tempo</span><b id="v2">–</b></div><div><span>Umfang</span><b id="v3">–</b></div></div></div></div></div>
+ <div class="row"><button class="pg" style="height:44px;font-size:14px" data-act="rom" id="ms">Bereit</button><button class="pb" style="flex:1;height:44px" data-act="go" id="go">Satz starten</button></div>`,"sm")+`</div>`
+ +c.ex.map((x,ei)=>`<section class="dk ${ei===T.ei?"act":""}"><div class="row">${th()}<div style="flex:1"><b style="font-size:17px">${esc(x.n)}</b><div class="mut">${esc(x.type)}</div></div><button class="round" data-act="trk" data-e="${ei}">${I("sensor",20,2)}</button></div><div class="th"><span>SATZ</span><span>KG</span><span>WDH</span><span></span><span></span></div>
+ ${x.sets.map((s,si)=>`<div class="sr ${ei===T.ei&&si===T.si?"cur":""}"><span class="mut">${si+1}</span><input type="number" inputmode="decimal" value="${s.w}" data-f="w" data-e="${ei}" data-s="${si}"><input type="number" inputmode="numeric" value="${s.r}" data-f="r" data-e="${ei}" data-s="${si}"><button class="ck ${s.d?"on":""}" data-act="ck" data-e="${ei}" data-s="${si}">${I("check",20,3)}</button><button class="ic mut" data-act="ds" data-e="${ei}" data-s="${si}">${I("dots",20)}</button></div>`).join("")}
+ <div class="row mut" style="justify-content:center;padding:14px 0 2px;cursor:pointer" data-act="as" data-e="${ei}">${I("plus",20)}<span>Satz hinzufügen</span></div></section>`).join("")}
+const REC={state:"",on:false,cd:0,t0:0,dur:30,data:[],note:"",csv:""};
+function rcPush(ax,ay,az,g){REC.data.push([Math.round(performance.now()-REC.t0),ax,ay,az].concat(g?g:[]))}
+function rcBuild(){REC.csv="# RepTracker-Aufnahme\n# Notiz: "+REC.note+"\n# Beschleunigung in mg, Drehrate in Grad/s, Rate ca. 50 Hz\nt_ms,ax,ay,az,gx,gy,gz\n"+REC.data.map(r=>r.join(",")).join("\n")+"\n"}
+function recCard(){const st=REC.state==="count"?"Gleich geht’s los – Tracker ruhig halten":REC.state==="rec"?"Aufnahme läuft …":REC.state==="done"?REC.data.length+" Messwerte aufgenommen":"Bereit";
+ return `<div class="lbl mut">Aufnahme für die Auswertung</div><p class="mut" style="margin:0 0 10px;font-size:13px">30 Sekunden Rohdaten aufnehmen: erst 3 Sekunden ruhig halten, dann so bewegen wie am Gerät.</p><input id="rc_note" placeholder="Notiz, z. B. flach, ca. 15 cm, 5 Wdh." value="${esc(REC.note)}" style="width:100%;background:#2c2c2f;border:0;border-radius:14px;padding:11px;font-size:15px;margin-bottom:10px"><button class="pw full" data-act="rcs">Aufnahme starten</button><div class="mut" id="rc_st" style="margin:10px 0 0;font-size:14px">${st}</div>${REC.state==="done"?`<div class="row" style="gap:8px;margin-top:10px"><button class="pg" style="flex:1" data-act="rcc">Kopieren</button><button class="pg" style="flex:1" data-act="rcd">Teilen / Speichern</button></div><textarea readonly style="width:100%;height:96px;margin-top:10px;background:#141417;color:#8e8e96;border:0;border-radius:12px;padding:10px;font-size:11px">${esc(REC.csv.slice(0,500))}…</textarea>`:""}`}
+setInterval(()=>{const n=performance.now();
+ if(REC.state==="count"&&n>=REC.cd){REC.state="rec";REC.t0=n;REC.on=true;navigator.vibrate&&navigator.vibrate(200);beep(880)}
+ else if(REC.state==="rec"&&n-REC.t0>=REC.dur*1000){REC.on=false;REC.state="done";rcBuild();navigator.vibrate&&navigator.vibrate([200,100,200]);beep(990);if(V.v==="test")R()}
+ if(V.v==="test"&&$("rc_st")){$("rc_st").textContent=REC.state==="count"?"Noch "+Math.max(0,Math.ceil((REC.cd-n)/1000))+" s – ruhig halten":REC.state==="rec"?"Aufnahme läuft … noch "+Math.max(0,Math.ceil(REC.dur-(n-REC.t0)/1000))+" s, "+REC.data.length+" Werte":REC.state==="done"?REC.data.length+" Messwerte aufgenommen":"Bereit"}},200);
+function vTest(){return hero(`<div class="row sp">${bk("back")}<span class="row" style="gap:8px"><span class="dot ${conn?"on":""}"></span><span class="mut" style="font-size:13px">${conn?"Verbunden mit "+esc(conn):"Nicht verbunden"}</span></span></div><h1 style="margin:18px 0 8px">Tracker-Test</h1><p class="mut" style="margin:0 0 16px">Prüfe Verbindung und Sensorwerte. Kippe und bewege den Tracker.</p><div class="row"><button class="pb" style="flex:1" data-act="conn">Verbinden</button><button class="pg" data-act="disc">Trennen</button></div>`)
+ +dk(`<div class="lbl mut">Live-Daten</div><div class="trow"><span>Pakete pro Sekunde (Soll 50)</span><b id="t_hz">–</b></div><div class="trow"><span>Beschleunigung X</span><b id="t_x">–</b></div><div class="trow"><span>Beschleunigung Y</span><b id="t_y">–</b></div><div class="trow"><span>Beschleunigung Z</span><b id="t_z">–</b></div><div class="trow"><span>Betrag (Soll ca. 1000 mg)</span><b id="t_g">–</b></div>`)
+ +dk(`<div class="lbl mut">Bewegung</div><div class="trow"><span>Erkannte Ausrichtung</span><b id="t_o">–</b></div><div class="trow"><span>Neigung (Hebelarm)</span><b id="t_a">–</b></div><div class="trow"><span>Hub vertikal (Stapel, grob)</span><b id="t_p">–</b></div><canvas id="t_cv" width="320" height="90" style="width:100%;height:90px;margin-top:10px;border-radius:14px;background:#141417"></canvas><div style="margin-top:12px"><button class="pw full" data-act="zero">Nullpunkt setzen</button></div><p class="mut" style="font-size:13px;margin:12px 0 0">Lege den Tracker ruhig hin, tippe „Nullpunkt setzen“ und kippe ihn dann. Die Neigung muss steigen. Liegt der Betrag nicht bei etwa 1000, stimmt etwas mit dem Sensor nicht.</p>`)+dk(recCard())}
+let tn0=0,tt0=performance.now(),thist=[];
+setInterval(()=>{if(V.v!=="test"||!$("t_x"))return;const n=performance.now(),ok=conn&&E.init;
+ if(n-tt0>=1000){$("t_hz").textContent=conn?Math.round(((E.n||0)-tn0)*1000/(n-tt0)):"–";tn0=E.n||0;tt0=n}
+ $("t_x").textContent=ok?E.ax+" mg":"–";$("t_y").textContent=ok?E.ay+" mg":"–";$("t_z").textContent=ok?E.az+" mg":"–";$("t_g").textContent=ok?Math.round(Math.hypot(E.ax,E.ay,E.az))+" mg":"–";
+ if(ok){const g=E.gs,ab=g.map(Math.abs),i=ab.indexOf(Math.max(...ab)),tilt=Math.round(Math.acos(Math.min(1,ab[i]/(Math.hypot(...g)||1)))*180/Math.PI);$("t_o").textContent=(i===2?"flach":"hochkant")+" · "+(g[i]>0?"+":"−")+"XYZ"[i]+(tilt>10?" (schräg "+tilt+"°)":"")}else $("t_o").textContent="–";
+ const deg=ok?E.th*180/Math.PI:0;$("t_a").textContent=ok?deg.toFixed(1)+"°":"–";$("t_p").textContent=ok?(E.gp*100).toFixed(1)+" cm":"–";
+ thist.push(deg);if(thist.length>120)thist.shift();const cv=$("t_cv"),x=cv.getContext("2d");x.clearRect(0,0,320,90);x.strokeStyle="#c8f23d";x.lineWidth=2;x.beginPath();const mx=Math.max(30,...thist);thist.forEach((v,i)=>{const px=i*320/119,py=84-v/mx*76;i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()},100);
+function sheet(){const d=S.rt.find(x=>x.id===V.rid).days.find(x=>x.id===V.did),e=V.sh.i>=0?d.ex[V.sh.i]:{n:"",type:"Machine",s:3,r:8,mode:"stack"};
+ return `<div class="ov"><div class="sh"><h2>${V.sh.i>=0?"Übung bearbeiten":"Neue Übung"}</h2><label>Name<input id="f_n" value="${esc(e.n)}"></label>
+ <label>Typ<select id="f_t">${["Machine","Plateloaded","Cable","Freihantel"].map(x=>`<option ${x===e.type?"selected":""}>${x}</option>`).join("")}</select></label>
+ <div class="row" style="align-items:flex-start"><label style="flex:1">Sätze<input id="f_s" type="number" value="${e.s}"></label><label style="flex:1">Wdh.<input id="f_r" type="number" value="${e.r}"></label></div>
+ 
+ <div class="row" style="margin-top:20px">${V.sh.i>=0?`<button class="pg" style="color:#ff6b6b" data-act="delex">Löschen</button>`:""}<button class="pg" style="flex:1" data-act="shx">Abbrechen</button><button class="pw" style="flex:1" data-act="shs">Speichern</button></div></div></div>`}
+function menuSheet(){return `<div class="ov" data-act="menu"><div class="mn">${[["today","grid","Heute"],["routines","list","Routinen"],["stats","chart","Fortschritt"],["tracker","sensor","Tracker"],["hist","timer","Verlauf"]].map(([k,i,n])=>`<button class="mi ${V.v===k?"on":""}" data-act="goto" data-v="${k}">${I(i,26,2)}<span>${n}</span></button>`).join("")}</div></div>`}
+function R(){const v=V.v,nv=["today","routines","stats","tracker","hist","acct"].includes(v);document.body.className=nv?"":"nn";
+ const F={today:vToday,routines:vRoutines,routine:vRoutine,day:vDay,preview:vPrev,workout:vWork3,track:vTrack,stats:vStats,tracker:vTracker,hist:vHist,acct:vAcct,test:vTest};
+ $("app").innerHTML=F[v]()+(V.sh?sheet():"")+(V.dsh?daySheet():"")+(V.menu&&nv?menuSheet():"")+(S.cur&&v!=="workout"&&v!=="track"?`<button class="fab ${nv?"":"low"}" data-act="resume" aria-label="Aktuelles Training">${I("dumb",22,2.4)}</button>`:"");
+ $("nav").style.display=nv?"block":"none";$("nav").innerHTML=`<div class="tabs">${[["today","grid","Heute"],["routines","list","Routinen"],["stats","chart","Fortschritt"],["acct","user","Konto"]].map(([k,i,n])=>`<button class="${v===k?"on":""}" data-act="goto" data-v="${k}">${I(i,22,2)}<span>${n}</span></button>`).join("")}</div>`;
+ if(v==="workout")loop();if(V.last!==v){window.scrollTo(0,0);V.last=v}}
+/* ---------- Workout + eGym tracking ---------- */
+function startWorkout(){const r=S.rt.find(x=>x.id===V.rid)||rt(),d=r.days.find(x=>x.id===V.did);S.cur={t:Date.now(),name:d.name,rest:0,rl:S.rl||150,ex:d.ex.map(e=>({n:e.n,type:e.type,mode:e.mode,t:e.r,sets:Array.from({length:e.s},()=>({w:lastW(e.n),r:e.r,d:0}))}))};save();startTrack(0)}
+function startTrack(ei){newT(ei,true);V.v="workout";R()}
+function startTrackOld(ei){const e=S.cur.ex[ei];let si=e.sets.findIndex(s=>!s.d);if(si<0){const l=e.sets[e.sets.length-1];e.sets.push({w:l?l.w:"",r:e.t,d:0});si=e.sets.length-1}
+ const s=e.sets[si];T={ei,si,ex:e,kg:+s.w||0,target:+s.r||e.t,run:false,cal:false,reps:0,pos:0,sim:0,up:0,pk:0,t0:0,te:0,fin:false,rmax:0,tgt:1,msg:"",pts:0,k:0,hits:[],tr:[],qs:[],low:0,tpk:0,go:Infinity};V.v="track";R()}
+function goBtn(){if(T.run||T.fin){finSet();return}if(S.cur.ex[T.ei].sets[T.si].d){newT(T.ei,true);R()}const n=performance.now();
+ Object.assign(T,{run:true,reps:0,t0:Date.now(),te:0,t1:n,up:0,pk:0,tgt:1,rmax:0,amax:0,smax:0,fin:false,msg:"",pts:0,k:0,hits:[],tr:[],qs:[],low:n,tpk:n,pks:[],tt:0,ti:0,aT:0,aB:1,fT:0,fB:0,sa:null,gset:0,ph:0,pd:0,pt:0,idl:0,P:0,vp:null,cdir:0,wait:false,go:Infinity});
+ E.gp=0;E.gv=0;if(E.gf)E.g0=E.gf.slice();T.cal=!!conn&&!(S.rom[T.ex.n]&&S.rom[T.ex.n].c);T.wait=!!conn;if(!T.cal)T.go=n+4800;beep(500)}
+function finSet(){T.run=false;if(T.reps>0){const s=S.cur.ex[T.ei].sets[T.si];s.w=T.kg;s.r=T.reps;s.d=1;S.cur.rest=Date.now();save()}nextAfter();V.v="workout";R()}
+function rep(now,pk){const tu=S.tu,td=S.td,up=(T.tpk-T.low)/1000,dn=Math.max(.2,(now-T.tpk)/1000-.5),rom=Math.min(1,pk),ts=1-Math.min(1,(Math.abs(up-tu)/tu+Math.abs(dn-td)/td)/2),q=Math.round(100*(.5*rom+.5*ts));
+ T.qs.push(q);(T.pks=T.pks||[]).push(rom);T.pts+=q;T.reps++;T.msg=q>=85?"Perfekt! "+q+" %":up<tu*.6?"Zu schnell hoch":dn<td*.6?"Zu schnell runter":"Gut: "+q+" %";
+ navigator.vibrate&&navigator.vibrate(q>=85?[40,40,40]:50);beep(q>=85?880:620);
+ if(T.reps>=T.target){T.fin=true;T.run=false;T.te=Date.now();T.msg="Satz geschafft! Ø Qualität "+Math.round(T.qs.reduce((a,b)=>a+b,0)/T.qs.length)+" %";beep(990)}}
+function stepPos(p,now){if(now<T.go)return;const hi=S.rm/100,lo=1-hi;
+ if(!T.up){if(p<=lo+.02){if(T.pk>.4&&T.pk<hi){T.msg="Nicht gezählt – nicht ganz hoch!";navigator.vibrate&&navigator.vibrate([80,50,80]);beep(220)}T.pk=0;T.low=now}T.pk=Math.max(T.pk,p);if(p>=hi){T.up=1;T.tgt=0;T.tpk=now;T.msg=""}}
+ else{T.pk=Math.max(T.pk,p);if(p<=lo){T.up=0;const pk=T.pk;T.pk=0;T.tgt=1;T.low=now;rep(now,pk)}}}
+function phaseEnd(dir,d,t0,t1){const e=T.ex,rom=S.rom[e.n];
+ if(d<.06)return;
+ if(T.vp&&t1-T.vp.t1>8000)T.vp=null;
+ if(T.cal){
+  if(!T.vp||T.vp.dir===dir){T.vp={dir,d,t0,t1};T.cdir=dir;return}
+  const R=(T.vp.d+d)/2;S.rom[e.n]={m:"stack",v:R,c:T.vp.dir};T.cal=false;T.vp=null;T.wait=true;T.go=t1;T.P=0;T.msg="Umfang gemessen – los geht’s!";save();beep(800);return}
+ const R=rom.v,c=rom.c;
+ if(dir===c){if(d>=.6*R){T.vp={dir,d,t0,t1};T.P=1;T.low=t0;T.tpk=t1;T.msg=""}else{T.vp=null;T.wait=true;T.msg="Nicht gezählt – nicht ganz hoch";navigator.vibrate&&navigator.vibrate([80,50,80]);beep(220)}}
+ else{T.P=0;T.wait=true;if(T.vp&&T.vp.dir===c&&d>=.6*R){const pk=Math.min(1,T.vp.d/R);T.vp=null;rep(t1,pk)}else{T.vp=null;if(d<.6*R)T.msg="Nicht gezählt – nicht ganz runter"}}}
+function step(){const e=T.ex,n=performance.now(),v=E.vel||0,rom=S.rom[e.n],R=rom&&rom.c?rom.v:0;
+ if(isFinite(T.go)&&n<T.go){T.pos=0;T.P=0;return}
+ if(T.ph===0){if(v>.04||v<-.04){T.ph=v>0?1:-1;T.pd=0;T.pt=n;T.idl=0;if(!T.cdir)T.cdir=T.ph;if(R&&T.ph===rom.c){T.go=n;T.wait=false}}}
+ else{T.pd+=v*.02;const flip=(T.ph===1&&v<-.04)||(T.ph===-1&&v>.04);T.idl=Math.abs(v)<.02?T.idl+1:0;
+  if(flip||T.idl>40){const d=Math.abs(T.pd),dir=T.ph,t0=T.pt;T.ph=flip?-dir:0;T.pd=0;T.pt=n;T.idl=0;phaseEnd(dir,d,t0,n);if(flip&&R&&T.ph===rom.c){T.go=n;T.wait=false}}}
+ const cd=(R?rom.c:T.cdir)||1;T.P=cl(T.P+v*.02*cd/(R||.25),-.1,1.1);T.pos+=(T.P-T.pos)*.5}
+function stepV1(){const e=T.ex,n=performance.now(),rom=S.rom[e.n];
+ if(T.cal){const a=E.th,s=E.gp;T.amax=Math.max(T.amax,a);T.smax=Math.max(T.smax,s);const arm=false,raw=s,mx=T.smax;T.rmax=mx;T.pos=Math.min(1,raw/(mx||1));
+  if((T.smax>.03)&&raw<mx*.2&&n-T.t1>1200){S.rom[e.n]={m:arm?"arm":"stack",v:mx};T.cal=false;T.up=0;T.pk=0;T.tgt=1;T.pos=0;T.go=n+3300;T.low=T.go;T.msg="Umfang gemessen – gleich geht’s los!";save();beep(800)}return}
+ const m="stack",v=typeof rom==="object"?rom.v:rom,raw=m==="arm"?E.th:E.gp,p=raw/v<.04?0:cl(raw/v,-.1,1.1);T.pos+=(p-T.pos)*.4;stepPos(T.pos,n)}
+function stepOld(){const e=T.ex,raw=e.mode==="arm"?E.th:E.gp,rom=S.rom[e.n],n=performance.now();
+ if(T.cal){T.rmax=Math.max(T.rmax,raw);T.pos=Math.min(1,raw/(T.rmax||1));
+  if(T.rmax>(e.mode==="arm"?.15:.004)&&raw<T.rmax*.2&&n-T.t1>1200){S.rom[e.n]=T.rmax;T.cal=false;T.up=0;T.pk=0;T.tgt=1;T.pos=0;T.go=n+3300;T.low=T.go;T.msg="Umfang gemessen – gleich geht’s los!";save();beep(800)}return}
+ const p=cl(raw/rom,-.1,1.1);T.pos+=(p-T.pos)*.4;stepPos(T.pos,n)}
+const curveAt=t=>{if(t<0)return 0;const tu=S.tu,td=S.td,u=t%(tu+td+.6),s=x=>x*x*(3-2*x);return u<tu?s(u/tu):u<tu+.3?1:u<tu+.3+td?s(1-(u-tu-.3)/td):0};
+function draw(now){const cv=$("cv"),st=$("trk"),d=devicePixelRatio||1,W=st.clientWidth,H=st.clientHeight;if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){cv.width=Math.round(W*d);cv.height=Math.round(H*d)}
+ const x=cv.getContext("2d");x.setTransform(d,0,0,d,0,0);x.globalCompositeOperation="source-over";x.clearRect(0,0,W,H);
+ const pd=Math.min(40,H*.2),Y=v=>H-pd-cl(v,-.1,1.1)*(H-2*pd),x0=W*.24,pps=W*.76/4,act=T.run&&!T.cal,t=act&&isFinite(T.go)?(now-T.go)/1000:0,bw=Math.max(20,H*.22),CS=.5,AC="200,242,61";
+ const bg=x.createRadialGradient(W*.5,0,0,W*.5,0,W*.75);bg.addColorStop(0,"rgba("+AC+",.11)");bg.addColorStop(1,"rgba("+AC+",0)");x.fillStyle=bg;x.fillRect(0,0,W,H);
+ x.fillStyle="rgba(255,255,255,.07)";for(let gx=(((-t*pps*.5)%26)+26)%26;gx<W;gx+=26)for(let gy=13;gy<H;gy+=26)x.fillRect(gx,gy,1.6,1.6);
+ const path=()=>{x.beginPath();for(let s=-1.4;s<=4.2;s+=.04){const px=x0+s*pps,py=Y(curveAt(t+s));s<-1.39?x.moveTo(px,py):x.lineTo(px,py)}};
+ x.lineCap="round";x.lineJoin="round";
+ path();x.strokeStyle="rgba("+AC+",.07)";x.lineWidth=bw+14;x.stroke();
+ path();x.strokeStyle="rgba(255,255,255,.2)";x.lineWidth=bw+2;x.stroke();
+ path();x.strokeStyle="#25252b";x.lineWidth=bw-1;x.stroke();
+ path();x.setLineDash([1,11]);x.strokeStyle="rgba("+AC+",.55)";x.lineWidth=2.5;x.stroke();x.setLineDash([]);
+ if(act&&t>=0&&!T.fin)while(T.k*CS<=t){const kT=T.k*CS;if(Math.abs(T.pos-curveAt(kT))<.2){T.hits[T.k]=1;T.pts+=5;(T.fx=T.fx||[]).push([now,Y(curveAt(kT))])}T.k++}
+ for(let k=Math.max(0,Math.ceil(t/CS));k*CS<=t+4.2;k++){const kT=k*CS,px=x0+(kT-t)*pps,py=Y(curveAt(kT)),r=4.5+Math.sin(now/260+k)*.9,g=x.createRadialGradient(px,py,0,px,py,r*2.6);g.addColorStop(0,"rgba("+AC+",.9)");g.addColorStop(.4,"rgba("+AC+",.25)");g.addColorStop(1,"rgba("+AC+",0)");x.globalAlpha=act?1:.5;x.fillStyle=g;x.beginPath();x.arc(px,py,r*2.6,0,7);x.fill();x.fillStyle="#fff";x.beginPath();x.arc(px,py,r*.55,0,7);x.fill();x.globalAlpha=1}
+ x.globalCompositeOperation="destination-in";const m=x.createLinearGradient(0,0,W,0);m.addColorStop(0,"rgba(0,0,0,0)");m.addColorStop(.1,"#000");m.addColorStop(.9,"#000");m.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=m;x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over";
+ T.ph=T.ph||[];T.ph.push([now,T.pos]);while(T.ph.length&&now-T.ph[0][0]>700)T.ph.shift();
+ for(let i=1;i<T.ph.length;i++){const a=T.ph[i-1],b=T.ph[i],al=i/T.ph.length;x.strokeStyle="rgba(255,255,255,"+(.45*al)+")";x.lineWidth=2+al*5;x.beginPath();x.moveTo(x0-(now-a[0])/1000*pps,Y(a[1]));x.lineTo(x0-(now-b[0])/1000*pps,Y(b[1]));x.stroke()}
+ (T.fx||[]).forEach(f=>{const k=(now-f[0])/500;if(k<1){x.strokeStyle="rgba("+AC+","+(1-k)+")";x.lineWidth=2.5;x.beginPath();x.arc(x0,f[1],12+k*30,0,7);x.stroke()}});T.fx=(T.fx||[]).filter(f=>now-f[0]<500);
+ const py=Y(T.pos),on=act&&t>=0&&Math.abs(T.pos-curveAt(t))<.2,r=Math.max(10,bw*.42),hc=on?AC:"255,255,255",h=x.createRadialGradient(x0,py,r*.5,x0,py,r*2.6);h.addColorStop(0,"rgba("+hc+",.45)");h.addColorStop(1,"rgba("+hc+",0)");x.fillStyle=h;x.beginPath();x.arc(x0,py,r*2.6,0,7);x.fill();
+ const o=x.createRadialGradient(x0-r*.35,py-r*.4,1,x0,py,r);o.addColorStop(0,"#fff");o.addColorStop(1,on?"#e9ffa0":"#d9d9df");x.fillStyle=o;x.beginPath();x.arc(x0,py,r,0,7);x.fill();x.strokeStyle=on?"rgba("+AC+",1)":"rgba(255,255,255,.7)";x.lineWidth=2;x.beginPath();x.arc(x0,py,r+4,0,7);x.stroke();
+ if(act&&t<0){x.save();x.textAlign="center";x.font='700 '+Math.round(H*.45)+'px system-ui,sans-serif';x.fillStyle="#fff";x.shadowColor="rgba("+AC+",.9)";x.shadowBlur=24;x.fillText(Math.ceil(-t),W*.62,H/2+H*.16);x.restore()}
+ if(T.cal){x.textAlign="center";x.font='500 12px system-ui,sans-serif';x.fillStyle="rgba(255,255,255,.7)";x.fillText("Einmal ganz hoch und ganz runter",W/2,H-10)}}
+function draw1(now){const cv=$("cv"),st=$("trk"),d=devicePixelRatio||1,W=st.clientWidth,H=st.clientHeight;if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){cv.width=Math.round(W*d);cv.height=Math.round(H*d)}
+ const x=cv.getContext("2d");x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,W,H);
+ const pd=Math.min(40,H*.2),Y=v=>H-pd-cl(v,-.1,1.1)*(H-2*pd),x0=W*.24,pps=W*.76/4,act=T.run&&!T.cal,t=act&&isFinite(T.go)?(now-T.go)/1000:0,bw=Math.max(18,H*.2),CS=.5;
+ x.lineCap="round";x.lineJoin="round";x.beginPath();for(let s=-1.2;s<=4.001;s+=.04){const px=x0+s*pps,py=Y(curveAt(t+s));s<-1.19?x.moveTo(px,py):x.lineTo(px,py)}x.strokeStyle="#2c2c32";x.lineWidth=bw;x.stroke();
+ if(act&&t>=0&&!T.fin)while(T.k*CS<=t){const kT=T.k*CS;if(Math.abs(T.pos-curveAt(kT))<.2){T.hits[T.k]=1;T.pts+=5}T.k++}
+ for(let k=Math.max(0,Math.ceil(t/CS));k*CS<=t+4;k++){const kT=k*CS,px=x0+(kT-t)*pps,py=Y(curveAt(kT));x.save();x.globalAlpha=act?1:.45;x.fillStyle="#c8f23d";x.shadowColor="#c8f23d";x.shadowBlur=8;x.beginPath();x.arc(px,py,4.5,0,7);x.fill();x.restore()}
+ const on=act&&t>=0&&Math.abs(T.pos-curveAt(t))<.2;x.save();x.shadowColor=on?"#c8f23d":"#fff";x.shadowBlur=on?22:10;x.fillStyle="#fff";x.beginPath();x.arc(x0,Y(T.pos),Math.max(9,bw*.42),0,7);x.fill();x.restore();
+ if(act&&t<0){x.textAlign="center";x.font='700 '+Math.round(H*.45)+'px system-ui,sans-serif';x.fillStyle="rgba(255,255,255,.9)";x.fillText(Math.ceil(-t),W*.62,H/2+H*.16)}
+ if(T.cal){x.textAlign="center";x.font='500 12px system-ui,sans-serif';x.fillStyle="rgba(255,255,255,.7)";x.fillText("Einmal ganz hoch und ganz runter",W/2,H-10)}}
+function drawOld(now){const cv=$("cv"),st=$("trk"),d=devicePixelRatio||1,W=st.clientWidth,H=st.clientHeight;if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){cv.width=Math.round(W*d);cv.height=Math.round(H*d)}
+ const x=cv.getContext("2d");x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,W,H);
+ const pd=Math.min(46,H*.2),Y=v=>H-pd-cl(v,-.1,1.1)*(H-2*pd),x0=W*.26,pps=W*.74/4,hi=S.rm/100,zr=(1-hi)*(H-2*pd),act=T.run&&!T.cal,t=act&&isFinite(T.go)?(now-T.go)/1000:-9;
+ x.fillStyle="rgba(255,90,60,.25)";x.fillRect(0,Y(1)-8,W,zr+8);x.fillRect(0,Y(0)-zr,W,zr+8);
+ x.fillStyle="rgba(255,255,255,.6)";x.font='700 10px "Space Mono",monospace';x.textAlign="left";x.fillText("ENDPOSITION",10,Y(1)+zr+16);x.fillText("START",10,Y(0)-zr-8);
+ x.strokeStyle="rgba(255,255,255,.14)";x.beginPath();x.moveTo(x0,8);x.lineTo(x0,H-8);x.stroke();
+ if(act&&t>-4){x.lineCap="round";x.lineJoin="round";
+  [[-1.2,0,.3],[0,4,1]].forEach(([a,b,al])=>{x.beginPath();for(let s=a;s<=b+.001;s+=.04){const px=x0+s*pps,py=Y(curveAt(t+s));s===a?x.moveTo(px,py):x.lineTo(px,py)}x.strokeStyle="#c8f23d";x.globalAlpha=al;x.lineWidth=7;if(al===1){x.shadowColor="#c8f23d";x.shadowBlur=14}x.stroke();x.shadowBlur=0});x.globalAlpha=1;
+  if(t>=0&&!T.fin)while(T.k*.3<=t){const kT=T.k*.3,h=Math.abs(T.pos-curveAt(kT))<.18;T.hits[T.k]=h;if(h)T.pts+=5;T.k++}
+  for(let k=Math.max(0,Math.floor((t-1.2)/.3));k*.3<=t+4;k++){const kT=k*.3,px=x0+(kT-t)*pps,py=Y(curveAt(kT));if(kT>t){x.fillStyle="#fff";x.beginPath();x.arc(px,py,4.5,0,7);x.fill()}else if(T.hits[k]===false){x.fillStyle="rgba(255,90,60,.7)";x.beginPath();x.arc(px,py,3,0,7);x.fill()}}
+  T.tr.push([t,T.pos]);while(T.tr.length&&T.tr[0][0]<t-1.2)T.tr.shift();x.beginPath();T.tr.forEach(([q,p],i)=>{const px=x0-(t-q)*pps,py=Y(p);i?x.lineTo(px,py):x.moveTo(px,py)});x.strokeStyle="rgba(255,255,255,.55)";x.lineWidth=3;x.stroke();
+  if(t<0){x.textAlign="center";x.font='700 '+Math.round(H*.45)+'px system-ui,sans-serif';x.fillStyle="#fff";x.fillText(Math.ceil(-t),W*.62,H/2+H*.16)}}
+ const on=act&&t>=0&&Math.abs(T.pos-curveAt(t))<.15;x.save();x.shadowColor=on?"#c8f23d":"#fff";x.shadowBlur=on?26:12;x.fillStyle=on?"#c8f23d":"#fff";x.strokeStyle="#111";x.lineWidth=3.5;x.beginPath();x.arc(x0,Y(T.pos),17,0,7);x.fill();x.stroke();x.restore();
+ x.textAlign="left";x.fillStyle="#fff";x.font='700 12px "Space Mono",monospace';x.fillText("PUNKTE "+T.pts,10,22);x.textAlign="right";x.fillText(Math.round(cl(T.pos,0,1)*100)+" % UMFANG",W-10,22);
+ if(T.cal){x.textAlign="center";x.fillStyle="#c8f23d";x.fillText("UMFANG MESSEN: EINMAL GANZ HOCH UND RUNTER",W/2,H-14)}}
+function loopOld(){const id=++LP;let lt=performance.now();const f=now=>{if(id!==LP||V.v!=="workout"||!$("cv"))return;const dt=Math.min(.05,(now-lt)/1000);lt=now;
+ if(!conn){T.sim=cl(T.sim+(down?dt/S.tu:-dt/S.td),0,1);if(T.run&&!T.cal)stepPos(T.sim,now);T.pos=T.sim}
+ draw(now);$("cnt").textContent=T.reps;$("tm").textContent=T.t0?mm(((T.run?Date.now():T.te||Date.now())-T.t0)/1000):"00:00";$("cs").className="cs"+(conn?" on":"");
+ $("go").textContent=T.fin?"Satz speichern":T.run?"Satz beenden":"Satz starten";$("ms").textContent=T.run?(T.cal?"Kalibriert …":"Misst …"):T.fin?"Fertig":"Bereit";
+ $("msg").textContent=T.msg||(T.cal?"Eine volle Wiederholung zum Messen: ganz hoch, ganz runter.":"Ziel: "+T.target+" saubere Wiederholungen. Ganz hoch, ganz runter.");requestAnimationFrame(f)};requestAnimationFrame(f)}
+/* ---------- Sensor ---------- */
+function feed(ax,ay,az,gy3){E.n=(E.n||0)+1;if(REC.on)rcPush(ax,ay,az,gy3);E.ax=ax;E.ay=ay;E.az=az;const A=[ax,ay,az];if(!E.init){E.gs=A.slice();E.gf=A.slice();E.g0=A.slice();E.init=1}
+ const run=!!(T&&T.run&&S.cur&&V.v==="workout");if(!run)E.gs=E.gs.map((x,i)=>x*.9+A[i]*.1);E.gf=E.gf.map((x,i)=>x*.8+A[i]*.2);
+ const gn=Math.hypot(...E.gs)||1,a=((ax*E.gs[0]+ay*E.gs[1]+az*E.gs[2])/gn-gn)*.00981;
+ E.av=(E.av||0)*.85+a*.15;
+ E.buf=E.buf||[];E.buf.push(A);if(E.buf.length>25)E.buf.shift();let still=false;if(E.buf.length>=25){const m=[0,1,2].map(i=>E.buf.reduce((s,b)=>s+b[i],0)/25);still=E.buf.every(b=>Math.abs(b[0]-m[0])<12&&Math.abs(b[1]-m[1])<12&&Math.abs(b[2]-m[2])<12);E.sm=m}
+ E.as=(E.as||0)+.4*(a-(E.as||0));E.vel=(E.vel||0)*.98+E.as*.02;if(run&&still&&Math.abs(E.vel)<.04){E.vel=0;E.gs=E.sm.slice()}E.gv=E.gv*.99+a*.02;E.st=Math.abs(E.av)<.04?E.st+1:0;if(E.st>50){E.gv=0;E.gp*=.5}E.gp=E.gp*.995+E.gv*.02;
+ const n1=Math.hypot(...E.gf)||1,n0=Math.hypot(...E.g0)||1,c=(E.gf[0]*E.g0[0]+E.gf[1]*E.g0[1]+E.gf[2]*E.g0[2])/(n1*n0);E.th=Math.acos(cl(c,-1,1));
+ if(run){const n=performance.now();if(n<T.t1+1500){T.sa=T.sa||[0,0,0,0];T.sa[0]+=ax;T.sa[1]+=ay;T.sa[2]+=az;T.sa[3]++}else{if(!T.gset){T.gset=1;if(T.sa&&T.sa[3]>5){const k=T.sa[3];E.gs=[T.sa[0]/k,T.sa[1]/k,T.sa[2]/k];E.g0=E.gs.slice()}E.gp=0;E.gv=0;E.st=0;E.vel=0;E.as=0}step()}}}
+let BD=null;
+async function connect(){if(!navigator.bluetooth){alert("Dein Browser unterstützt kein Web Bluetooth. Nutze Chrome (Android/PC) oder den Browser „Bluefy“ (iPhone).");return}
+ try{const d=await navigator.bluetooth.requestDevice({filters:[{services:[SVC]},{namePrefix:"RepTracker"}],optionalServices:[SVC]});BD=d;await link(d)}
+ catch(err){if(err.name==="NotFoundError")return;alert(err.name==="SecurityError"?"Bluetooth ist in dieser eingebetteten Ansicht gesperrt. Öffne die Seite direkt im Browser oder lade die Datei auf GitHub Pages hoch.":"Verbindung fehlgeschlagen: "+err.message)}}
+async function link(d){d.removeEventListener("gattserverdisconnected",onDisc);d.addEventListener("gattserverdisconnected",onDisc);
+ const sv=await(await d.gatt.connect()).getPrimaryService(SVC),c=await sv.getCharacteristic(CHR);
+ c.addEventListener("characteristicvaluechanged",e=>{const D=e.target.value;feed(D.getInt16(0,true),D.getInt16(2,true),D.getInt16(4,true),D.byteLength>=12?[D.getInt16(6,true)/10,D.getInt16(8,true)/10,D.getInt16(10,true)/10]:null)});
+ await c.startNotifications();conn=d.name||"RepTracker";E.init=0;E.n=0;if(V.v!=="workout")R()}
+async function onDisc(){conn="";if(V.v!=="workout")R();if(!BD)return;for(let i=0;i<4;i++){await new Promise(r=>setTimeout(r,1500));if(!BD)return;try{await link(BD);return}catch(e){}}}
+async function connectOld(){if(!navigator.bluetooth){alert("Web Bluetooth fehlt: Chrome (Android/PC) oder Bluefy (iPhone) nutzen.");return}
+ try{const d=await navigator.bluetooth.requestDevice({filters:[{services:[SVC]}]});d.addEventListener("gattserverdisconnected",()=>{conn="";if(V.v!=="track")R()});
+  const sv=await(await d.gatt.connect()).getPrimaryService(SVC),c=await sv.getCharacteristic(CHR);
+  c.addEventListener("characteristicvaluechanged",e=>{const D=e.target.value;feed(D.getInt16(0,true),D.getInt16(2,true),D.getInt16(4,true),D.byteLength>=12?[D.getInt16(6,true)/10,D.getInt16(8,true)/10,D.getInt16(10,true)/10]:null)});
+  await c.startNotifications();conn=d.name;E.init=0;if(V.v!=="track")R()}catch(err){alert("Fehler: "+err.message)}}
+/* ---------- Events ---------- */
+document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(!t)return;const a=t.dataset.act,D=t.dataset,r=S.rt.find(x=>x.id===V.rid),d=r&&r.days.find(x=>x.id===V.did),c=S.cur;
+ if(a==="goto"){V.v=D.v;V.sh=null;V.menu=0}
+ else if(a==="menu")V.menu=!V.menu;
+ else if(a==="back")V.v={routines:"today",routine:"routines",day:"routine",preview:"today",stats:"today",tracker:"today",hist:"today",test:"acct"}[V.v]||"today";
+ else if(a==="prev"){V.did=+D.d;V.rid=+D.r||rt().id;V.v="preview"}
+ else if(a==="rtn"){V.rid=+D.r;V.v="routine"}
+ else if(a==="newr"){const n=prompt("Name der Routine");if(!n)return;const id=Date.now();S.rt.push({id,name:n,days:[]});V.rid=id;V.v="routine";V.dsh=1}
+ else if(a==="delr"){if(!confirm("Routine löschen?"))return;S.rt=S.rt.filter(x=>x.id!==V.rid);if(S.act===V.rid)S.act=S.rt[0]?S.rt[0].id:0;V.v="routines"}
+ else if(a==="setact")S.act=S.act===V.rid?0:V.rid;
+ else if(a==="addd")V.dsh=1;
+ else if(a==="dnew"){const n=prompt("Name des Trainingstags");if(!n)return;r.days.push({id:Date.now(),name:n,wd:[],ex:[]});V.dsh=0}
+ else if(a==="dx")V.dsh=0;
+ else if(a==="dpick"){const src=S.rt.find(x=>x.id===+D.r).days.find(x=>x.id===+D.d),cp=JSON.parse(JSON.stringify(src));cp.id=Date.now();cp.wd=[];r.days.push(cp);V.dsh=0}
+ else if(a==="dhist"){const h=histU()[+D.i],tp=n=>{for(const x of S.rt)for(const dd of x.days){const e=dd.ex.find(q=>q.n===n);if(e)return e.type}return"Machine"};r.days.push({id:Date.now(),name:h.name,wd:[],ex:h.ex.map(x=>({n:x.n,type:tp(x.n),s:x.sets.length,r:Math.round(x.sets.reduce((a,s)=>a+s.r,0)/x.sets.length)||8,mode:"stack"}))});V.dsh=0}
+ else if(a==="dayv"){V.did=+D.d;V.v="day"}
+ else if(a==="wd"){const w=+D.w,i=d.wd.indexOf(w);i>=0?d.wd.splice(i,1):d.wd.push(w)}
+ else if(a==="exed")V.sh={i:+D.i};else if(a==="addex")V.sh={i:-1};else if(a==="shx")V.sh=null;
+ else if(a==="shs"){const n=$("f_n").value.trim();if(!n)return;const o={n,type:$("f_t").value,s:+$("f_s").value||3,r:+$("f_r").value||8};if(V.sh.i>=0)Object.assign(d.ex[V.sh.i],o);else d.ex.push(o);V.sh=null}
+ else if(a==="delex"){d.ex.splice(V.sh.i,1);V.sh=null}
+ else if(a==="start")return startWorkout();
+ else if(a==="start1"){V.did=+D.d;V.rid=+D.r||rt().id;return startWorkout()}
+ else if(a==="chg"){V.v="routine"}
+ else if(a==="resume")V.v="workout";
+ else if(a==="cancel"){if(!confirm("Training abbrechen? Die Daten gehen verloren."))return;S.cur=null;V.v="today"}
+ else if(a==="fin"){const ex=c.ex.map(x=>({n:x.n,sets:x.sets.filter(s=>s.d).map(s=>({w:+s.w||0,r:+s.r||0}))})).filter(x=>x.sets.length);if(!ex.length&&!confirm("Keine Sätze abgehakt. Training verwerfen?"))return;if(ex.length)S.hist.push({t:c.t,dur:(Date.now()-c.t)/1000,name:c.name,ex});S.cur=null;V.v="today"}
+ else if(a==="rl"){const L=[60,90,120,150,180];c.rl=L[(L.indexOf(c.rl)+1)%5]}
+ else if(a==="ck"){const s=c.ex[+D.e].sets[+D.s];s.d=s.d?0:1;if(s.d)c.rest=Date.now()}
+ else if(a==="ds"){if(!confirm("Satz löschen?"))return;c.ex[+D.e].sets.splice(+D.s,1)}
+ else if(a==="as"){const ss=c.ex[+D.e].sets,l=ss[ss.length-1]||{w:"",r:c.ex[+D.e].t};ss.push({w:l.w,r:l.r,d:0})}
+ else if(a==="trk")return selectEx(+D.e);
+ else if(a==="tx"){T.run=false;V.v="workout"}
+ else if(a==="kgm"||a==="kgp"){T.kg=Math.max(0,+(T.kg+(a==="kgp"?1:-1)*(S.step||2.5)).toFixed(1));$("kg").textContent=T.kg;c.ex[T.ei].sets[T.si].w=T.kg;const el=document.querySelector('[data-f="w"][data-e="'+T.ei+'"][data-s="'+T.si+'"]');if(el)el.value=T.kg;save();return}
+ else if(a==="go"){goBtn();return}
+ else if(a==="rom"){if(T.run)return;if(confirm("Bewegungsumfang für dieses Gerät neu messen?")){delete S.rom[T.ex.n];save();T.msg="Der Umfang wird beim nächsten Satz neu gemessen."}return}
+ else if(a==="conn"){connect();return}
+ else if(a==="disc"){const d=BD;BD=null;if(d&&d.gatt&&d.gatt.connected)d.gatt.disconnect();conn=""}
+ else if(a==="zero"){if(E.gf)E.g0=E.gf.slice();E.gp=0;E.gv=0;return}
+ else if(a==="rcs"){if(!conn){alert("Bitte zuerst den Tracker verbinden.");return}REC.note=$("rc_note")?$("rc_note").value:REC.note;REC.state="count";REC.cd=performance.now()+3000;REC.data=[];REC.on=false;REC.csv="";beep(500)}
+ else if(a==="rcc"){try{navigator.clipboard.writeText(REC.csv).then(()=>alert("Daten kopiert."),()=>alert("Kopieren nicht erlaubt. Nutze Teilen / Speichern."))}catch(e){alert("Kopieren nicht möglich. Nutze Teilen / Speichern.")}return}
+ else if(a==="rcd"){const f=new File([REC.csv],"reptracker-aufnahme.csv",{type:"text/csv"});if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f],title:"RepTracker Aufnahme"}).catch(()=>{});else{const l=document.createElement("a");l.href=URL.createObjectURL(f);l.download=f.name;document.body.appendChild(l);l.click();l.remove()}return}
+ else if(a==="rm"||a==="tu"||a==="td")S[a]=+D.x;
+ else if(a==="set")S[D.k]=+D.x;
+ else if(a==="romreset"){if(!confirm("Alle gemessenen Bewegungsumfänge zurücksetzen? Sie werden beim nächsten Satz neu gemessen."))return;S.rom={}}
+ else if(a==="name"){const n=prompt("Dein Name",S.name||"");if(n===null)return;S.name=n.trim()}
+ else if(a==="exp"){const j=JSON.stringify(S);try{navigator.clipboard.writeText(j).then(()=>alert("Daten in die Zwischenablage kopiert."),()=>prompt("Daten kopieren:",j))}catch(e){prompt("Daten kopieren:",j)}return}
+ else if(a==="imp"){const j=prompt("Exportierte Daten hier einfügen");if(!j)return;try{const o=JSON.parse(j);if(!o.rt)throw 0;S=o;S.rom=S.rom||{}}catch(e){alert("Das sind keine gültigen Daten.");return}}
+ else if(a==="reset"){if(!confirm("Wirklich alle Daten löschen?"))return;S=seed();V.v="today"}
+ save();R()});
+document.addEventListener("input",e=>{const t=e.target;if(t.dataset.f&&S.cur){S.cur.ex[+t.dataset.e].sets[+t.dataset.s][t.dataset.f]=t.value;if(T&&t.dataset.f==="w"&&+t.dataset.e===T.ei&&+t.dataset.s===T.si){T.kg=+t.value||0;if($("kg"))$("kg").textContent=T.kg}save()}});
+document.addEventListener("change",e=>{if(e.target.id==="pe"){V.pe=e.target.value;R()}});
+document.addEventListener("pointerdown",e=>{if(e.target.closest("#trk"))down=true});["pointerup","pointercancel"].forEach(k=>document.addEventListener(k,()=>down=false));
+setInterval(()=>{const c=S.cur;if(V.v!=="workout"||!c)return;if($("el"))$("el").textContent=fmt((Date.now()-c.t)/1000);const r=$("rest");if(!r)return;
+ if(c.rest){const rem=c.rl-(Date.now()-c.rest)/1000;if(rem<=0){c.rest=0;save();navigator.vibrate&&navigator.vibrate([100,60,100]);beep(900);r.style.visibility="hidden"}else{r.style.visibility="visible";r.textContent="Pause "+fmt(rem)}}else r.style.visibility="hidden"},500);
+R();
+</script></body></html>
