@@ -148,10 +148,16 @@ function vTracker(){const ch=(k,arr,u)=>arr.map(x=>`<button class="chip ${S[k]==
 function vHist(){const tv=S.hist.reduce((a,h)=>a+vol(h),0),l=S.hist[S.hist.length-1];
  return hero(`<div class="mut" style="margin-bottom:18px">Alle Trainings</div><h1>Verlauf</h1><div class="row" style="gap:40px;margin-top:22px"><div><div class="big2">${S.hist.length}</div><div class="mut">Workouts</div></div><div><div class="big2">${Math.round(tv/1000*10)/10}</div><div class="mut">Tonnen bewegt</div></div></div>${l?`<p class="mut" style="margin:18px 0 0">Zuletzt: ${esc(l.name)}, ${dstr(l.t)}</p>`:""}`)
  +dk(S.hist.length?S.hist.slice().reverse().map(h=>`<div class="item" style="cursor:default"><div class="row sp"><b style="font-size:16px">${esc(h.name)}</b><span class="mut">${dstr(h.t)} · ${fmt(h.dur)} min</span></div><div class="mut" style="margin:4px 0 6px">${vol(h)} kg Volumen</div>${h.ex.map(x=>`<div class="mut" style="font-size:15px">${esc(x.n)}: ${x.sets.map(s=>s.w+"×"+s.r).join(", ")}</div>`).join("")}</div>`).join(""):`<p class="mut" style="margin:0">Noch keine Trainings.</p>`)}
+function statsCard(){const names=[...new Set(S.hist.flatMap(h=>h.ex.map(x=>x.n)))];if(!V.pe||!names.includes(V.pe))V.pe=names[0]||"";
+ const pts=S.hist.map(h=>{let m=0;h.ex.filter(x=>x.n===V.pe).forEach(x=>x.sets.forEach(s=>{m=Math.max(m,s.w*(1+s.r/30))}));return m}).filter(v=>v>0);let svg="",pr=0,prs=null;
+ S.hist.forEach(h=>h.ex.filter(x=>x.n===V.pe).forEach(x=>x.sets.forEach(s=>{if(s.w*(1+s.r/30)>pr){pr=s.w*(1+s.r/30);prs=s}})));
+ if(pts.length){const mx=Math.max(...pts)*1.1,mn=Math.min(...pts)*.9,xy=(v,i)=>[14+i*272/Math.max(1,pts.length-1),126-(v-mn)/(mx-mn||1)*112];svg=`<svg viewBox="0 0 300 140" style="margin-top:14px"><polyline fill="none" stroke="#c8f23d" stroke-width="3" stroke-linejoin="round" points="${pts.map((v,i)=>xy(v,i).join(",")).join(" ")}"/>${pts.map((v,i)=>{const[x,y]=xy(v,i);return`<circle cx="${x}" cy="${y}" r="5" fill="#c8f23d"/>`}).join("")}</svg>`}
+ const g=gains();
+ return dk(`<div class="lbl mut">Fortschritt · geschätztes 1RM</div>${names.length?`<select id="pe" style="width:100%;background:#2c2c2f;border:0;border-radius:14px;padding:10px;font-size:15px;color:#fff">${names.map(n=>`<option ${n===V.pe?"selected":""}>${esc(n)}</option>`).join("")}</select>${svg}${prs?`<p style="margin:12px 0 0"><b>PR:</b> ${prs.w} kg × ${prs.r}</p>`:""}`:`<p class="mut" style="margin:0">Schließe ein Training ab, dann siehst du hier deine Kurven.</p>`}<div class="lbl mut" style="margin-top:22px">Steigerungen</div>${g.length?g.map(([nm,v])=>`<div class="row sp item" style="cursor:default"><b>${esc(nm)}</b><b style="color:${v>=0?"var(--ac)":"#ff6b6b"}">${v>=0?"+":""}${v} kg</b></div>`).join(""):`<p class="mut" style="margin:0">Noch zu wenig Daten.</p>`}`)}
 function vAcct(){const tv=S.hist.reduce((a,h)=>a+vol(h),0),nm=S.name||"Athlet",df={step:2.5,rl:150,snd:1,vib:1},
  ch=(k,arr,u)=>arr.map(x=>`<button class="chip ${(S[k]===undefined?df[k]:S[k])===x?"on":""}" data-act="set" data-k="${k}" data-x="${x}">${u(x)}</button>`).join(""),
  rows=S.hist.length?S.hist.slice().reverse().map(h=>`<div class="item" style="cursor:default"><div class="row sp"><b style="font-size:16px">${esc(h.name)}</b><span class="mut" style="font-size:13px">${dstr(h.t)} · ${fmt(h.dur)} min</span></div><div class="mut" style="margin:3px 0 4px;font-size:13px">${vol(h)} kg Volumen</div>${h.ex.map(x=>`<div class="mut" style="font-size:13px">${esc(x.n)}: ${x.sets.map(s=>s.w+"×"+s.r).join(", ")}</div>`).join("")}</div>`).join(""):`<p class="mut" style="margin:0">Noch keine Trainings.</p>`;
- return hero(`<div class="mut" style="margin-bottom:16px">Konto</div><div class="row" style="gap:14px"><div class="av2">${esc(nm[0].toUpperCase())}</div><div><h1 style="font-size:26px">${esc(nm)}</h1><div class="mut">Daten lokal auf diesem Gerät</div></div></div><div class="row" style="gap:30px;margin:18px 0"><div><div class="big2" style="font-size:28px">${S.hist.length}</div><div class="mut">Workouts</div></div><div><div class="big2" style="font-size:28px">${Math.round(tv/100)/10}</div><div class="mut">Tonnen</div></div><div><div class="big2" style="font-size:28px">${S.rt.length}</div><div class="mut">Routinen</div></div></div><button class="pb full" data-act="name">Name ändern</button>`)
+ return hero(`<div class="mut" style="margin-bottom:16px">Konto</div><div class="row" style="gap:14px"><div class="av2">${esc(nm[0].toUpperCase())}</div><div><h1 style="font-size:26px">${esc(nm)}</h1><div class="mut">Daten lokal auf diesem Gerät</div></div></div><div class="row" style="gap:30px;margin:18px 0"><div><div class="big2" style="font-size:28px">${S.hist.length}</div><div class="mut">Workouts</div></div><div><div class="big2" style="font-size:28px">${Math.round(tv/100)/10}</div><div class="mut">Tonnen</div></div><div><div class="big2" style="font-size:28px">${S.rt.length}</div><div class="mut">Routinen</div></div></div><button class="pb full" data-act="name">Name ändern</button>`)+statsCard()
  +dk(`<div class="row sp" style="margin-bottom:12px"><span class="lbl mut" style="margin:0">Tracker</span><span class="row" style="gap:8px"><span class="dot ${conn?"on":""}"></span><span class="mut" style="font-size:13px">${conn?"Verbunden mit "+esc(conn):"Nicht verbunden"}</span></span></div><button class="pw full" data-act="conn">Mit Tracker verbinden</button><button class="pg full" style="margin-top:8px" data-act="goto" data-v="test">Tracker testen</button><p class="mut" style="margin:12px 0 0;font-size:13px">Android/PC: Chrome. iPhone: Browser „Bluefy“. Den Bewegungsumfang jedes Geräts misst die App in den ersten 3 Wiederholungen selbst (sie zählen mit) und misst nur die Hoch-und-runter-Bewegung. Drehungen werden ignoriert.</p><div style="margin-top:12px"><button class="pg full" data-act="romreset">Messungen zurücksetzen</button></div>`)
  +dk(`<div class="lbl mut">Training</div><p class="mut" style="margin:0 0 8px">Gewichtsschritt (+/− im Tracker)</p><div class="row" style="gap:8px;flex-wrap:wrap">${ch("step",[1,2.5,5],x=>x+" kg")}</div><p class="mut" style="margin:14px 0 8px">Standard-Pause</p><div class="row" style="gap:8px;flex-wrap:wrap">${ch("rl",[60,90,120,150,180],x=>fmt(x))}</div><div style="margin-top:16px"></div>`)
  +dk(`<div class="lbl mut">Feedback</div><div class="row sp" style="margin-bottom:10px"><span>Ton</span><div class="row" style="gap:8px">${ch("snd",[1,0],x=>x?"An":"Aus")}</div></div><div class="row sp"><span>Vibration</span><div class="row" style="gap:8px">${ch("vib",[1,0],x=>x?"An":"Aus")}</div></div>`)
@@ -173,7 +179,7 @@ function vWork2(){const c=S.cur;initT();const tot=c.ex.reduce((n,e)=>n+e.sets.le
  <div class="row mut" style="justify-content:center;padding:14px 0 2px;cursor:pointer" data-act="as" data-e="${ei}">${I("plus",20)}<span>Satz hinzufügen</span></div></section>`).join("")}
 const histU=()=>{const seen={},o=[];S.hist.slice().reverse().forEach(h=>{if(!seen[h.name]){seen[h.name]=1;o.push(h)}});return o};
 function daySheet(){const mine=S.rt.flatMap(x=>x.days.map(d=>({x,d}))),hs=histU();
- return `<div class="ov"><div class="sh" style="max-height:86vh;overflow:auto"><h2>Workout hinzufügen</h2><button class="pw full" style="margin:14px 0 4px" data-act="dnew">Neuen Tag anlegen</button>
+ return `<div class="ov"><div class="sh" style="max-height:86vh;overflow:auto"><h2>Workout hinzufügen</h2><button class="pw full" style="margin:14px 0 4px" data-act="dnew">Neuen Tag anlegen</button><button class="pg full" style="margin:8px 0 4px" data-act="prvd">Aus Vorlagen wählen</button>
  <div class="lbl mut" style="margin-top:18px">Bestehende Workouts</div>${mine.length?mine.map(({x,d})=>`<div class="row item" data-act="dpick" data-r="${x.id}" data-d="${d.id}">${th()}<div style="flex:1"><b>${esc(d.name)}</b><div class="mut" style="font-size:13px">${esc(x.name)} · ${d.ex.length} Übungen · ${nsets(d)} Sätze</div></div><span class="mut">${I("plus",22)}</span></div>`).join(""):`<p class="mut" style="margin:0">Noch keine gespeicherten Workouts.</p>`}
  ${hs.length?`<div class="lbl mut" style="margin-top:18px">Absolvierte Workouts</div>`+hs.map((h,i)=>`<div class="row item" data-act="dhist" data-i="${i}">${th()}<div style="flex:1"><b>${esc(h.name)}</b><div class="mut" style="font-size:13px">${dstr(h.t)} · ${h.ex.length} Übungen</div></div><span class="mut">${I("plus",22)}</span></div>`).join(""):""}
  <button class="pg full" style="margin-top:16px" data-act="dx">Abbrechen</button></div></div>`}
@@ -210,7 +216,7 @@ function vWork3(){const c=S.cur;initT();const tot=c.ex.reduce((n,e)=>n+e.sets.le
  <div class="row mut" style="justify-content:center;padding:14px 0 2px;cursor:pointer" data-act="as" data-e="${ei}">${I("plus",20)}<span>Satz hinzufügen</span></div></section>`).join("")}
 const REC={state:"",on:false,cd:0,t0:0,dur:30,data:[],note:"",csv:""};
 function rcPush(ax,ay,az,g){REC.data.push([Math.round(performance.now()-REC.t0),ax,ay,az].concat(g?g:[]))}
-function rcBuild(){REC.csv="# RepTracker-Aufnahme\n# Notiz: "+REC.note+"\n# Beschleunigung in mg, Drehrate in Grad/s, Rate ca. 50 Hz\nt_ms,ax,ay,az,gx,gy,gz\n"+REC.data.map(r=>r.join(",")).join("\n")+"\n"}
+function rcBuild(){REC.csv="# RepTracker-Aufnahme\n# Notiz: "+REC.note+"\n# Beschleunigung in mg, Drehrate in Grad/s, Rate ca. 50 Hz (ToF-Modus: ax=Distanz mm, ay=Tempo mm/s)\nt_ms,ax,ay,az,gx,gy,gz\n"+REC.data.map(r=>r.join(",")).join("\n")+"\n"}
 function recCard(){const st=REC.state==="count"?"Gleich geht’s los – Tracker ruhig halten":REC.state==="rec"?"Aufnahme läuft …":REC.state==="done"?REC.data.length+" Messwerte aufgenommen":"Bereit";
  return `<div class="lbl mut">Aufnahme für die Auswertung</div><p class="mut" style="margin:0 0 10px;font-size:13px">30 Sekunden Rohdaten aufnehmen: erst 3 Sekunden ruhig halten, dann so bewegen wie am Gerät.</p><input id="rc_note" placeholder="Notiz, z. B. flach, ca. 15 cm, 5 Wdh." value="${esc(REC.note)}" style="width:100%;background:#2c2c2f;border:0;border-radius:14px;padding:11px;font-size:15px;margin-bottom:10px"><button class="pw full" data-act="rcs">Aufnahme starten</button><div class="mut" id="rc_st" style="margin:10px 0 0;font-size:14px">${st}</div>${REC.state==="done"?`<div class="row" style="gap:8px;margin-top:10px"><button class="pg" style="flex:1" data-act="rcc">Kopieren</button><button class="pg" style="flex:1" data-act="rcd">Teilen / Speichern</button></div><textarea readonly style="width:100%;height:96px;margin-top:10px;background:#141417;color:#8e8e96;border:0;border-radius:12px;padding:10px;font-size:11px">${esc(REC.csv.slice(0,500))}…</textarea>`:""}`}
 setInterval(()=>{const n=performance.now();
@@ -226,7 +232,7 @@ setInterval(()=>{if(V.v!=="test"||!$("t_x"))return;const n=performance.now(),ok=
  $("t_x").textContent=ok?E.ax+" mg":"–";$("t_y").textContent=ok?E.ay+" mg":"–";$("t_z").textContent=ok?E.az+" mg":"–";$("t_g").textContent=ok?Math.round(Math.hypot(E.ax,E.ay,E.az))+" mg":"–";
  if(ok){const g=E.gs,ab=g.map(Math.abs),i=ab.indexOf(Math.max(...ab)),tilt=Math.round(Math.acos(Math.min(1,ab[i]/(Math.hypot(...g)||1)))*180/Math.PI);$("t_o").textContent=(i===2?"flach":"hochkant")+" · "+(g[i]>0?"+":"−")+"XYZ"[i]+(tilt>10?" (schräg "+tilt+"°)":"")}else $("t_o").textContent="–";
  const deg=ok?E.th*180/Math.PI:0;$("t_a").textContent=ok?deg.toFixed(1)+"°":"–";$("t_p").textContent=ok?(E.gp*100).toFixed(1)+" cm":"–";
- thist.push(deg);if(thist.length>120)thist.shift();const cv=$("t_cv"),x=cv.getContext("2d");x.clearRect(0,0,320,90);x.strokeStyle="#c8f23d";x.lineWidth=2;x.beginPath();const mx=Math.max(30,...thist);thist.forEach((v,i)=>{const px=i*320/119,py=84-v/mx*76;i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()},100);
+ if(ok&&E.tof){$("t_x").textContent="Distanz "+Math.round(E.dist*1000)+" mm";$("t_y").textContent="Tempo "+Math.round(E.vel*1000)+" mm/s";$("t_z").textContent="–";$("t_g").textContent="–";$("t_o").textContent="ToF nach oben";$("t_a").textContent="–"}thist.push(E.tof?Math.max(0,E.gp*100):deg);if(thist.length>120)thist.shift();const cv=$("t_cv"),x=cv.getContext("2d");x.clearRect(0,0,320,90);x.strokeStyle="#c8f23d";x.lineWidth=2;x.beginPath();const mx=Math.max(30,...thist);thist.forEach((v,i)=>{const px=i*320/119,py=84-v/mx*76;i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()},100);
 function sheet(){const d=S.rt.find(x=>x.id===V.rid).days.find(x=>x.id===V.did),e=V.sh.i>=0?d.ex[V.sh.i]:{n:"",type:"Machine",s:3,r:8,mode:"stack"};
  return `<div class="ov"><div class="sh"><h2>${V.sh.i>=0?"Übung bearbeiten":"Neue Übung"}</h2><label>Name<input id="f_n" value="${esc(e.n)}"></label>
  <label>Typ<select id="f_t">${["Machine","Plateloaded","Cable","Freihantel"].map(x=>`<option ${x===e.type?"selected":""}>${x}</option>`).join("")}</select></label>
@@ -234,10 +240,61 @@ function sheet(){const d=S.rt.find(x=>x.id===V.rid).days.find(x=>x.id===V.did),e
  
  <div class="row" style="margin-top:20px">${V.sh.i>=0?`<button class="pg" style="color:#ff6b6b" data-act="delex">Löschen</button>`:""}<button class="pg" style="flex:1" data-act="shx">Abbrechen</button><button class="pw" style="flex:1" data-act="shs">Speichern</button></div></div></div>`}
 function menuSheet(){return `<div class="ov" data-act="menu"><div class="mn">${[["today","grid","Heute"],["routines","list","Routinen"],["stats","chart","Fortschritt"],["tracker","sensor","Tracker"],["hist","timer","Verlauf"]].map(([k,i,n])=>`<button class="mi ${V.v===k?"on":""}" data-act="goto" data-v="${k}">${I(i,26,2)}<span>${n}</span></button>`).join("")}</div></div>`}
-function R(){const v=V.v,nv=["today","routines","stats","tracker","hist","acct"].includes(v);document.body.className=nv?"":"nn";
- const F={today:vToday,routines:vRoutines,routine:vRoutine,day:vDay,preview:vPrev,workout:vWork3,track:vTrack,stats:vStats,tracker:vTracker,hist:vHist,acct:vAcct,test:vTest};
- $("app").innerHTML=F[v]()+(V.sh?sheet():"")+(V.dsh?daySheet():"")+(V.menu&&nv?menuSheet():"")+(S.cur&&v!=="workout"&&v!=="track"?`<button class="fab ${nv?"":"low"}" data-act="resume" aria-label="Aktuelles Training">${I("dumb",22,2.4)}</button>`:"");
- $("nav").style.display=nv?"block":"none";$("nav").innerHTML=`<div class="tabs">${[["today","grid","Heute"],["routines","list","Routinen"],["stats","chart","Fortschritt"],["acct","user","Konto"]].map(([k,i,n])=>`<button class="${v===k?"on":""}" data-act="goto" data-v="${k}">${I(i,22,2)}<span>${n}</span></button>`).join("")}</div>`;
+/* ---------- Übungsübersicht ---------- */
+const CAT=[["Chest Press Machine","Brust","Machine"],["Pec Deck","Brust","Machine"],["Bench Press","Brust","Plateloaded"],["Schrägbankdrücken","Brust","Freihantel"],["Cable Fly","Brust","Cable"],
+ ["Lat Pulldown","Rücken","Cable"],["Row","Rücken","Plateloaded"],["Enges Rudern","Rücken","Cable"],["Seated Row Machine","Rücken","Machine"],["Klimmzüge","Rücken","Bodyweight"],
+ ["Shoulder Press Machine","Schultern","Machine"],["Lateral Raise","Schultern","Plateloaded"],["Machine Lateral Raise","Schultern","Plateloaded"],["Face Pull","Schultern","Cable"],
+ ["Bizeps Curl","Arme","Cable"],["Barbell Curl","Arme","Barbell"],["Preacher Curl","Arme","Barbell"],["Trizeps Pushdown","Arme","Cable"],["Dips Maschine","Arme","Machine"],
+ ["Beinpresse","Beine","Machine"],["Beinbeuger","Beine","Machine"],["Beinstrecker","Beine","Machine"],["Kniebeuge","Beine","Barbell"],["Wadenheben","Beine","Machine"],
+ ["Hip Thrust","Gesäß","Barbell"],["Abduktoren","Gesäß","Machine"],["Crunch","Core","Bodyweight"],["Bauchmaschine","Core","Machine"],["Plank","Core","Bodyweight"]];
+const GR=["Brust","Rücken","Schultern","Arme","Beine","Gesäß","Core"],EQ={Machine:"Maschine",Plateloaded:"Plate-Loaded",Cable:"Kabelzug",Freihantel:"Freihantel",Barbell:"Langhantel",Bodyweight:"Körpergewicht"};
+function exAll(){const m=new Map();CAT.forEach(([n,g,t])=>m.set(n,{n,g,t,c:0}));
+ S.rt.forEach(r=>r.days.forEach(d=>d.ex.forEach(e=>{if(!m.has(e.n))m.set(e.n,{n:e.n,g:"Eigene",t:e.type,c:1})})));
+ S.hist.forEach(h=>h.ex.forEach(x=>{if(!m.has(x.n))m.set(x.n,{n:x.n,g:"Eigene",t:"Machine",c:1})}));return[...m.values()]}
+const TIPS={Machine:"Tracker mit Magnet oben auf die Deckplatte des Gewichtsstapels legen, Sensor nach oben. Darüber muss freie Fläche sein (Decke, mind. 4 cm Abstand).",
+ Cable:"Tracker oben auf die Deckplatte des Gewichtsstapels legen, Sensor nach oben. Freie Fläche darüber, nichts im Strahl.",
+ Plateloaded:"Tracker an den beweglichen Teil legen (Hebelarm oder Gewichtsscheibe), Sensor zeigt nach oben. Darüber freie Fläche, mind. 4 cm Abstand.",
+ Freihantel:"Tracker auf die Hantel oder Scheibe legen, Sensor nach oben. Die Decke darüber muss frei sein. Bei Übungen über Kopf nicht geeignet.",
+ Barbell:"Tracker auf die Hantel oder Scheibe legen, Sensor nach oben. Die Decke darüber muss frei sein. Bei Übungen über Kopf nicht geeignet.",
+ Bodyweight:"Tracker auf Brust oder Bauch legen, Sensor zur Decke. Gerade bleiben, die Decke darüber muss frei sein."};
+const TIPS_ALL="Vor jedem Satz 1,5 Sekunden ruhig halten. Die ersten 3 Wiederholungen lernt die App die Bewegung.";
+const toType=t=>["Machine","Plateloaded","Cable","Freihantel"].includes(t)?t:"Freihantel";
+function exAll(){const m=new Map();CAT.forEach(([n,g,t])=>m.set(n,{n,g,t}));
+ S.rt.forEach(r=>r.days.forEach(d=>d.ex.forEach(e=>{if(!m.has(e.n))m.set(e.n,{n:e.n,g:"Weitere",t:e.type})})));
+ S.hist.forEach(h=>h.ex.forEach(x=>{if(!m.has(x.n))m.set(x.n,{n:x.n,g:"Weitere",t:"Machine"})}));return[...m.values()].sort((a,b)=>a.n.localeCompare(b.n))}
+function exList(){const q=(V.eq||"").trim().toLowerCase(),g=V.eg||"all";
+ const L=exAll().filter(e=>(g==="all"||e.g===g)&&e.n.toLowerCase().includes(q));
+ return L.length?L.map(e=>{const o=V.xo===e.n;return`<div class="item" style="cursor:default"><div class="row"><div style="flex:1;min-width:0;cursor:pointer" data-act="exo" data-n="${esc(e.n)}">${"" }<b style="font-size:16px">${esc(e.n)}</b><div class="mut" style="font-size:13px">${esc(e.g)} · ${esc(EQ[e.t]||e.t)}</div></div><button class="round sm" data-act="exa" data-n="${esc(e.n)}" aria-label="Zu Workout hinzufügen">${I("plus",18)}</button></div>${o?`<div style="margin-top:10px;background:#141417;border-radius:14px;padding:12px;font-size:13px;line-height:1.45"><b style="color:var(--ac)">Tracker-Tipp</b><div style="margin-top:4px">${TIPS[e.t]||TIPS.Machine}</div><div class="mut" style="margin-top:6px">${TIPS_ALL}</div></div>`:""}</div>`}).join(""):`<p class="mut" style="margin:0">Keine Übungen gefunden.</p>`}
+function vEx(seg){return hero(`<div class="row sp">${V.pr?bk():"<span></span>"}<span class="mut">${exAll().length} Übungen</span></div><h1 style="margin:18px 0 8px">Bibliothek</h1>${seg||""}<input id="exq" placeholder="Übungen suchen" value="${esc(V.eq||"")}" style="width:100%;background:#ececef;color:#0b0b0c;border:0;border-radius:999px;padding:12px 16px;font-size:15px;margin-top:14px">`)
+ +dk(`<div class="row" style="gap:8px;overflow-x:auto;margin-bottom:6px;padding-bottom:6px">${["all",...GR].map(x=>`<button class="chip ${(V.eg||"all")===x?"on":""}" data-act="exg" data-g="${x}">${x==="all"?"Alle":x}</button>`).join("")}</div><div id="exl">${exList()}</div><p class="mut" style="font-size:12px;margin:12px 0 0">Tippe auf eine Übung für den Tracker-Tipp, auf + zum Hinzufügen.</p>`)}
+function exSheet(){const mine=S.rt.flatMap(x=>x.days.map(d=>({x,d})));
+ return `<div class="ov"><div class="sh" style="max-height:86vh;overflow:auto"><h2>Hinzufügen</h2><p class="mut" style="margin:4px 0 8px">${esc(V.xp)}</p>
+ ${S.cur?`<div class="row item" data-act="exto" data-k="cur"><div style="flex:1"><b>Aktuelles Training</b><div class="mut" style="font-size:13px">${esc(S.cur.name)}</div></div><span class="mut">${I("plus",22)}</span></div>`:""}
+ ${mine.map(({x,d})=>`<div class="row item" data-act="exto" data-k="${x.id}:${d.id}"><div style="flex:1"><b>${esc(d.name)}</b><div class="mut" style="font-size:13px">${esc(x.name)} · ${d.ex.length} Übungen</div></div><span class="mut">${I("plus",22)}</span></div>`).join("")||(S.cur?"":`<p class="mut">Lege zuerst in den Routinen ein Workout an.</p>`)}
+ <button class="pg full" style="margin-top:16px" data-act="exx">Abbrechen</button></div></div>`}
+/* ---------- Vorlagen ---------- */
+const PRE=[
+ {n:"Ganzkörper",d:"2 Tage pro Woche, ideal zum Einstieg",days:[
+  {n:"Ganzkörper A",wd:[1],ex:[["Beinpresse",3,10],["Chest Press Machine",3,10],["Lat Pulldown",3,10],["Shoulder Press Machine",2,12],["Bauchmaschine",2,15]]},
+  {n:"Ganzkörper B",wd:[4],ex:[["Beinbeuger",3,10],["Pec Deck",3,12],["Seated Row Machine",3,10],["Bizeps Curl",2,12],["Trizeps Pushdown",2,12]]}]},
+ {n:"Push Pull Legs",d:"3 Tage: Drücken, Ziehen, Beine",days:[
+  {n:"Push",wd:[1],ex:[["Chest Press Machine",3,8],["Schrägbankdrücken",3,10],["Shoulder Press Machine",3,10],["Lateral Raise",3,12],["Trizeps Pushdown",3,12]]},
+  {n:"Pull",wd:[3],ex:[["Lat Pulldown",3,8],["Seated Row Machine",3,10],["Face Pull",3,15],["Bizeps Curl",3,12],["Barbell Curl",2,10]]},
+  {n:"Legs",wd:[5],ex:[["Beinpresse",4,10],["Beinstrecker",3,12],["Beinbeuger",3,12],["Hip Thrust",3,10],["Wadenheben",3,15]]}]},
+ {n:"Oberkörper / Unterkörper",d:"4 Tage, Oberkörper und Unterkörper im Wechsel",days:[
+  {n:"Oberkörper",wd:[1,4],ex:[["Chest Press Machine",3,8],["Lat Pulldown",3,8],["Shoulder Press Machine",3,10],["Seated Row Machine",3,10],["Bizeps Curl",2,12],["Trizeps Pushdown",2,12]]},
+  {n:"Unterkörper",wd:[2,5],ex:[["Beinpresse",4,10],["Beinbeuger",3,12],["Beinstrecker",3,12],["Abduktoren",3,15],["Wadenheben",3,15],["Bauchmaschine",3,15]]}]}];
+let _pid=0;
+function preDay(d,keep){const ex=exAll();return{id:Date.now()+(++_pid),name:d.n,wd:keep?d.wd.slice():[],ex:d.ex.map(([n,s,r])=>{const e=ex.find(q=>q.n===n);return{n,type:toType(e?e.t:"Machine"),s,r,mode:"stack"}})}}
+function vPre(seg){const tgt=S.rt.find(x=>x.id===V.pr);
+ return hero(`<div class="row sp">${V.pr?bk():"<span></span>"}<span class="mut">${tgt?"Ziel: "+esc(tgt.name):"Fertige Workouts"}</span></div><h1 style="margin:18px 0 8px">Bibliothek</h1><p class="mut" style="margin:0">Fertige Routinen und einzelne Workouts. Du kannst sie danach anpassen.</p>${seg||""}`)
+ +PRE.map((p,pi)=>dk(`<h3>${esc(p.n)}</h3><div class="mut" style="font-size:13px;margin-top:2px">${esc(p.d)} · ${p.days.length} Workouts</div><button class="pw full" style="margin:14px 0 6px" data-act="prr" data-p="${pi}">Ganze Routine übernehmen</button>`
+  +p.days.map((d,di)=>`<div class="row item" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(d.n)}</b><div class="mut" style="font-size:13px">${d.ex.map(e=>esc(e[0])).join(" · ")}</div></div><button class="round sm" data-act="prd" data-p="${pi}" data-d="${di}" aria-label="Workout hinzufügen">${I("plus",18)}</button></div>`).join(""))).join("")}
+function vLib(){const e=V.pt==="e",seg=`<div class="row" style="gap:8px;margin-top:14px"><button class="chip ${e?"":"on"}" data-act="lt" data-t="w">Workouts</button><button class="chip ${e?"on":""}" data-act="lt" data-t="e">Übungen</button></div>`;return e?vEx(seg):vPre(seg)}
+function R(){const v=V.v,nv=["today","routines","presets","tracker","hist","acct"].includes(v);document.body.className=nv?"":"nn";
+ const F={today:vToday,routines:vRoutines,routine:vRoutine,day:vDay,preview:vPrev,workout:vWork3,track:vTrack,stats:vStats,tracker:vTracker,hist:vHist,acct:vAcct,test:vTest,exercises:vEx,presets:vLib};
+ $("app").innerHTML=F[v]()+(V.sh?sheet():"")+(V.dsh?daySheet():"")+(V.xp?exSheet():"")+(V.menu&&nv?menuSheet():"")+(S.cur&&v!=="workout"&&v!=="track"?`<button class="fab ${nv?"":"low"}" data-act="resume" aria-label="Aktuelles Training">${I("dumb",22,2.4)}</button>`:"");
+ $("nav").style.display=nv?"block":"none";$("nav").innerHTML=`<div class="tabs">${[["today","grid","Heute"],["routines","list","Routinen"],["presets","dumb","Bibliothek"],["acct","user","Konto"]].map(([k,i,n])=>`<button class="${v===k?"on":""}" data-act="goto" data-v="${k}">${I(i,22,2)}<span>${n}</span></button>`).join("")}</div>`;
  if(v==="workout")loop();if(V.last!==v){window.scrollTo(0,0);V.last=v}}
 /* ---------- Workout + eGym tracking ---------- */
 function startWorkout(){const r=S.rt.find(x=>x.id===V.rid)||rt(),d=r.days.find(x=>x.id===V.did);S.cur={t:Date.now(),name:d.name,rest:0,rl:S.rl||150,ex:d.ex.map(e=>({n:e.n,type:e.type,mode:e.mode,t:e.r,sets:Array.from({length:e.s},()=>({w:lastW(e.n),r:e.r,d:0}))}))};save();startTrack(0)}
@@ -343,13 +400,18 @@ function feed(ax,ay,az,gy3){E.n=(E.n||0)+1;if(REC.on)rcPush(ax,ay,az,gy3);E.ax=a
  E.as=(E.as||0)+.4*(a-(E.as||0));E.vel=(E.vel||0)*.98+E.as*.02;if(run&&still&&Math.abs(E.vel)<.04){E.vel=0;E.gs=E.sm.slice()}E.gv=E.gv*.99+a*.02;E.st=Math.abs(E.av)<.04?E.st+1:0;if(E.st>50){E.gv=0;E.gp*=.5}E.gp=E.gp*.995+E.gv*.02;
  const n1=Math.hypot(...E.gf)||1,n0=Math.hypot(...E.g0)||1,c=(E.gf[0]*E.g0[0]+E.gf[1]*E.g0[1]+E.gf[2]*E.g0[2])/(n1*n0);E.th=Math.acos(cl(c,-1,1));
  if(run){const n=performance.now();if(n<T.t1+1500){T.sa=T.sa||[0,0,0,0];T.sa[0]+=ax;T.sa[1]+=ay;T.sa[2]+=az;T.sa[3]++}else{if(!T.gset){T.gset=1;if(T.sa&&T.sa[3]>5){const k=T.sa[3];E.gs=[T.sa[0]/k,T.sa[1]/k,T.sa[2]/k];E.g0=E.gs.slice()}E.gp=0;E.gv=0;E.st=0;E.vel=0;E.as=0}step()}}}
+/* ToF-Modus: Paket = int16 Tempo (mm/s, hoch = positiv) + uint16 Distanz (mm), 50 Hz */
+function feedTof(v,d){E.n=(E.n||0)+1;E.tof=1;E.init=1;E.vel=v;E.dist=d;if(E.d0===undefined)E.d0=d;E.gp=E.d0-d;E.th=0;E.ax=Math.round(d*1000);E.ay=Math.round(v*1000);E.az=0;E.gs=E.gs||[0,0,1000];
+ if(REC.on)rcPush(Math.round(d*1000),Math.round(v*1000),0);
+ const run=!!(T&&T.run&&S.cur&&V.v==="workout");
+ if(run){const n=performance.now();if(n>=T.t1+1500){if(!T.gset){T.gset=1;E.d0=d;E.gp=0}step()}}}
 let BD=null;
 async function connect(){if(!navigator.bluetooth){alert("Dein Browser unterstützt kein Web Bluetooth. Nutze Chrome (Android/PC) oder den Browser „Bluefy“ (iPhone).");return}
  try{const d=await navigator.bluetooth.requestDevice({filters:[{services:[SVC]},{namePrefix:"RepTracker"}],optionalServices:[SVC]});BD=d;await link(d)}
  catch(err){if(err.name==="NotFoundError")return;alert(err.name==="SecurityError"?"Bluetooth ist in dieser eingebetteten Ansicht gesperrt. Öffne die Seite direkt im Browser oder lade die Datei auf GitHub Pages hoch.":"Verbindung fehlgeschlagen: "+err.message)}}
 async function link(d){d.removeEventListener("gattserverdisconnected",onDisc);d.addEventListener("gattserverdisconnected",onDisc);
  const sv=await(await d.gatt.connect()).getPrimaryService(SVC),c=await sv.getCharacteristic(CHR);
- c.addEventListener("characteristicvaluechanged",e=>{const D=e.target.value;feed(D.getInt16(0,true),D.getInt16(2,true),D.getInt16(4,true),D.byteLength>=12?[D.getInt16(6,true)/10,D.getInt16(8,true)/10,D.getInt16(10,true)/10]:null)});
+ c.addEventListener("characteristicvaluechanged",e=>{const D=e.target.value;if(D.byteLength===4){feedTof(D.getInt16(0,true)/1000,D.getUint16(2,true)/1000);return}feed(D.getInt16(0,true),D.getInt16(2,true),D.getInt16(4,true),D.byteLength>=12?[D.getInt16(6,true)/10,D.getInt16(8,true)/10,D.getInt16(10,true)/10]:null)});
  await c.startNotifications();conn=d.name||"RepTracker";E.init=0;E.n=0;if(V.v!=="workout")R()}
 async function onDisc(){conn="";if(V.v!=="workout")R();if(!BD)return;for(let i=0;i<4;i++){await new Promise(r=>setTimeout(r,1500));if(!BD)return;try{await link(BD);return}catch(e){}}}
 async function connectOld(){if(!navigator.bluetooth){alert("Web Bluetooth fehlt: Chrome (Android/PC) oder Bluefy (iPhone) nutzen.");return}
@@ -359,11 +421,25 @@ async function connectOld(){if(!navigator.bluetooth){alert("Web Bluetooth fehlt:
   await c.startNotifications();conn=d.name;E.init=0;if(V.v!=="track")R()}catch(err){alert("Fehler: "+err.message)}}
 /* ---------- Events ---------- */
 document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(!t)return;const a=t.dataset.act,D=t.dataset,r=S.rt.find(x=>x.id===V.rid),d=r&&r.days.find(x=>x.id===V.did),c=S.cur;
- if(a==="goto"){V.v=D.v;V.sh=null;V.menu=0}
+ if(a==="goto"){if(D.v==="presets")V.pr=0;V.v=D.v;V.sh=null;V.menu=0}
  else if(a==="menu")V.menu=!V.menu;
- else if(a==="back")V.v={routines:"today",routine:"routines",day:"routine",preview:"today",stats:"today",tracker:"today",hist:"today",test:"acct"}[V.v]||"today";
+ else if(a==="back")V.v={routines:"today",routine:"routines",day:"routine",preview:"today",stats:"today",tracker:"today",hist:"today",test:"acct",exercises:"routines",presets:V.pr?"routine":"routines"}[V.v]||"today";
  else if(a==="prev"){V.did=+D.d;V.rid=+D.r||rt().id;V.v="preview"}
  else if(a==="rtn"){V.rid=+D.r;V.v="routine"}
+ else if(a==="lt")V.pt=D.t;
+ else if(a==="exv"){V.v="exercises";V.eq="";V.eg="all"}
+ else if(a==="prv"){V.pr=0;V.v="presets"}
+ else if(a==="prvd"){V.pr=V.rid;V.dsh=0;V.v="presets"}
+ else if(a==="prr"){const q=PRE[+D.p],id=Date.now();S.rt.push({id,name:q.n,days:q.days.map(x=>preDay(x,true))});if(!S.act)S.act=id;alert("Routine „"+q.n+"“ hinzugefügt.")}
+ else if(a==="prd"){const q=PRE[+D.p].days[+D.d];let t=S.rt.find(x=>x.id===V.pr)||rt();if(!t){t={id:Date.now(),name:"Meine Routine",days:[]};S.rt.push(t);S.act=t.id}t.days.push(preDay(q,false));alert("Workout „"+q.n+"“ zu „"+t.name+"“ hinzugefügt.")}
+ else if(a==="exg")V.eg=D.g;
+ else if(a==="exo")V.xo=V.xo===D.n?"":D.n;
+ else if(a==="exa")V.xp=D.n;
+ else if(a==="exx")V.xp=null;
+ else if(a==="exto"){const e=exAll().find(q=>q.n===V.xp),ty=toType(e.t);
+  if(D.k==="cur"){S.cur.ex.push({n:e.n,type:ty,mode:"stack",t:10,sets:[0,1,2].map(()=>({w:lastW(e.n),r:10,d:0}))})}
+  else{const[ri,di]=D.k.split(":").map(Number);S.rt.find(x=>x.id===ri).days.find(x=>x.id===di).ex.push({n:e.n,type:ty,s:3,r:10,mode:"stack"})}
+  V.xp=null;alert("„"+e.n+"“ hinzugefügt.")}
  else if(a==="newr"){const n=prompt("Name der Routine");if(!n)return;const id=Date.now();S.rt.push({id,name:n,days:[]});V.rid=id;V.v="routine";V.dsh=1}
  else if(a==="delr"){if(!confirm("Routine löschen?"))return;S.rt=S.rt.filter(x=>x.id!==V.rid);if(S.act===V.rid)S.act=S.rt[0]?S.rt[0].id:0;V.v="routines"}
  else if(a==="setact")S.act=S.act===V.rid?0:V.rid;
@@ -394,7 +470,7 @@ document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(
  else if(a==="rom"){if(T.run)return;if(confirm("Bewegungsumfang für dieses Gerät neu messen?")){delete S.rom[T.ex.n];save();T.msg="Die Bewegung wird beim nächsten Satz neu gelernt."}return}
  else if(a==="conn"){connect();return}
  else if(a==="disc"){const d=BD;BD=null;if(d&&d.gatt&&d.gatt.connected)d.gatt.disconnect();conn=""}
- else if(a==="zero"){if(E.gf)E.g0=E.gf.slice();E.gp=0;E.gv=0;return}
+ else if(a==="zero"){E.d0=E.dist;if(E.gf)E.g0=E.gf.slice();E.gp=0;E.gv=0;return}
  else if(a==="rcs"){if(!conn){alert("Bitte zuerst den Tracker verbinden.");return}REC.note=$("rc_note")?$("rc_note").value:REC.note;REC.state="count";REC.cd=performance.now()+3000;REC.data=[];REC.on=false;REC.csv="";beep(500)}
  else if(a==="rcc"){try{navigator.clipboard.writeText(REC.csv).then(()=>alert("Daten kopiert."),()=>alert("Kopieren nicht erlaubt. Nutze Teilen / Speichern."))}catch(e){alert("Kopieren nicht möglich. Nutze Teilen / Speichern.")}return}
  else if(a==="rcd"){const f=new File([REC.csv],"reptracker-aufnahme.csv",{type:"text/csv"});if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f],title:"RepTracker Aufnahme"}).catch(()=>{});else{const l=document.createElement("a");l.href=URL.createObjectURL(f);l.download=f.name;document.body.appendChild(l);l.click();l.remove()}return}
@@ -406,7 +482,7 @@ document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(
  else if(a==="imp"){const j=prompt("Exportierte Daten hier einfügen");if(!j)return;try{const o=JSON.parse(j);if(!o.rt)throw 0;S=o;S.rom=S.rom||{}}catch(e){alert("Das sind keine gültigen Daten.");return}}
  else if(a==="reset"){if(!confirm("Wirklich alle Daten löschen?"))return;S=seed();V.v="today"}
  save();R()});
-document.addEventListener("input",e=>{const t=e.target;if(t.dataset.f&&S.cur){S.cur.ex[+t.dataset.e].sets[+t.dataset.s][t.dataset.f]=t.value;if(T&&t.dataset.f==="w"&&+t.dataset.e===T.ei&&+t.dataset.s===T.si){T.kg=+t.value||0;if($("kg"))$("kg").textContent=T.kg}save()}});
+document.addEventListener("input",e=>{const t=e.target;if(t.id==="exq"){V.eq=t.value;const l=$("exl");if(l)l.innerHTML=exList();return}if(t.dataset.f&&S.cur){S.cur.ex[+t.dataset.e].sets[+t.dataset.s][t.dataset.f]=t.value;if(T&&t.dataset.f==="w"&&+t.dataset.e===T.ei&&+t.dataset.s===T.si){T.kg=+t.value||0;if($("kg"))$("kg").textContent=T.kg}save()}});
 document.addEventListener("change",e=>{if(e.target.id==="pe"){V.pe=e.target.value;R()}});
 document.addEventListener("pointerdown",e=>{if(e.target.closest("#trk"))down=true});["pointerup","pointercancel"].forEach(k=>document.addEventListener(k,()=>down=false));
 setInterval(()=>{const c=S.cur;if(V.v!=="workout"||!c)return;if($("el"))$("el").textContent=fmt((Date.now()-c.t)/1000);const r=$("rest");if(!r)return;
