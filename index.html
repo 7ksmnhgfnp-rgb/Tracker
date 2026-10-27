@@ -472,15 +472,14 @@ svg.pls rect,svg.pls circle{transform-box:fill-box;transform-origin:center}
 .gsp.an{transform-box:fill-box;transform-origin:left center;animation:gsin .6s cubic-bezier(.3,1.5,.5,1) both}.gsp.gl{filter:drop-shadow(0 0 7px rgba(255,255,255,.35))}
 @keyframes gsin{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
 @media(prefers-reduced-motion:reduce){.gsp.an{animation:none}}
-.mn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px;text-align:center}
-.mn-l{font-size:15px;color:#8e8e8e}.mn-r{display:flex;align-items:center;gap:22px}.mn-r b{font:800 96px/1 "Bricolage Grotesque",Inter,sans-serif;letter-spacing:-.04em;min-width:1.4em;color:#fff}.mn-r .round{width:58px;height:58px}
-.mn{gap:12px}.mn-r b.pop{animation:mnpop .45s cubic-bezier(.3,1.6,.5,1)}@keyframes mnpop{0%{transform:scale(.82)}100%{transform:scale(1)}}
-.mn-s{display:flex;flex-direction:column;gap:5px;width:210px;margin-top:4px}
-.mn-b{position:relative;height:15px;border:0;padding:0;border-radius:99px;background:#2c2c2c;transition:background .25s,transform .45s cubic-bezier(.3,1.7,.5,1);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.mn-b.on{background:#e4ff3a;transform:scaleX(1)}.mn-b:not(.on){transform:scaleX(.9)}
-.mn-b i{position:absolute;left:-26px;top:50%;transform:translateY(-50%);font:600 11px Inter,sans-serif;color:#6f6f6f;font-style:normal}
-.mn-b em{position:absolute;right:-44px;top:50%;transform:translateY(-50%);font:600 11px Inter,sans-serif;color:#e4ff3a;font-style:normal}
-.mn-b.tg:not(.on){box-shadow:inset 0 0 0 1.5px #e4ff3a66}
+.mm-r{display:flex;align-items:center;gap:8px;margin-top:12px}.mm-r .round{width:38px;height:38px;flex:none}
+.mm-r .round svg{width:18px;height:18px}
+.mm-rail{position:absolute;right:16px;top:22px;bottom:96px;width:calc(50% - 40px);display:flex;flex-direction:column-reverse;justify-content:flex-start;gap:6px;padding:0 14px;border-left:3px solid rgba(255,255,255,.1);border-right:3px solid rgba(255,255,255,.1);border-radius:3px}
+.mm-b{flex:1;max-height:40px;min-height:0;border:0;padding:0;border-radius:99px;background:rgba(255,255,255,.07);transition:background .25s,box-shadow .25s,transform .45s cubic-bezier(.3,1.7,.5,1);-webkit-tap-highlight-color:transparent;cursor:pointer}
+.mm-b.on{transform:scaleX(1)}.mm-b:not(.on){transform:scaleX(.96)}
+.mm-b.top{background:#e4ff3a!important;box-shadow:0 0 22px rgba(228,255,58,.35)}
+.mm-b.tg:not(.on){background:transparent;box-shadow:inset 0 0 0 2px rgba(228,255,58,.55);-webkit-mask:none}
+#mr.pop{animation:mnpop .45s cubic-bezier(.3,1.6,.5,1);display:inline-block}@keyframes mnpop{0%{transform:scale(.82)}100%{transform:scale(1)}}
 </style></head><body>
 <div id="splash" aria-hidden="true"><div class="sp-lg"><svg width="60" height="82" viewBox="0 0 60 82"><rect class="sb q1" y="70" width="60" height="12" rx="6"/><rect class="sb q2" y="52" width="60" height="12" rx="6"/><rect class="sb q3" y="34" width="60" height="12" rx="6"/><rect class="sy qy" width="60" height="12" rx="6"/></svg><div class="sp-wm"><span class="l" style="--k:0">s</span><span class="l" style="--k:1">t</span><span class="l" style="--k:2">a</span><span class="l" style="--k:3">c</span><span class="l" style="--k:4">k</span><span class="l pt" style="--k:5">.</span></div></div><div class="sp-cl">Ganz hoch, ganz runter.</div></div>
 <script>(function(){var sp=document.getElementById("splash");if(!sp)return;var skip=false;try{skip=/nosplash/.test(location.search)||sessionStorage.getItem("stk_sp")==="1";sessionStorage.setItem("stk_sp","1")}catch(e){}if(skip){sp.remove();return}var done=false;function end(){if(done)return;done=true;sp.classList.add("out");setTimeout(function(){sp.remove()},600)}sp.addEventListener("click",end);setTimeout(end,2600)})();</script>
@@ -625,7 +624,7 @@ function monthChart(){const n=new Date(),SM=["Jan","Feb","Mär","Apr","Mai","Jun
  S.hist.forEach(h=>{const d=new Date(h.t),e=M.find(x=>x.y===d.getFullYear()&&x.m===d.getMonth());if(e)e.c++});
  const mx=Math.max(1,...M.map(x=>x.c)),W=300,H=130,bw=18,g=(W-12*bw)/11,tot=M.reduce((a,x)=>a+x.c,0);
  return `<div class="row sp" style="margin-bottom:6px"><span class="lbl" style="margin:0">Workouts pro Monat</span><span class="mut" style="font-size:13px">${tot} in 12 Monaten</span></div><svg viewBox="0 0 ${W} ${H+20}" style="width:100%">${M.map((x,i)=>{const h=x.c?Math.max(4,x.c/mx*(H-30)):0,X=i*(bw+g),last=i===11;return`<rect x="${X}" y="${H-h}" width="${bw}" height="${h}" rx="5" fill="#ff5a2a" opacity="${last?1:.75}"/>${x.c?`<text x="${X+bw/2}" y="${H-h-5}" text-anchor="middle" font-size="10" fill="#fff" font-weight="600">${x.c}</text>`:""}<text x="${X+bw/2}" y="${H+14}" text-anchor="middle" font-size="9" fill="#8e8e8e">${SM[x.m]}</text>`}).join("")}</svg>`}
-function spSheet(){const x=S.rt.find(z=>z.id===V.sp);if(!x)return"";const on=x.id===S.act;
+function spSheet(){const x=S.rt.find(z=>z.id===V.spo);if(!x)return"";const on=x.id===S.act;
  return `<div class="ov pop ich"><div class="sh"><div class="row sp"><div><div class="mut" style="font-size:13px;${on?"color:#e4ff3a":""}">${on?"Aktiver Split":"Split"}</div><h2 style="margin:0">${esc(x.name)}</h2></div><button class="round" data-act="spx" aria-label="Schließen">${I("x",20)}</button></div><div class="pbody" style="margin-top:12px">${x.days.length?x.days.map(y=>`<div class="row item"><div style="flex:1;min-width:0"><b style="font-size:17px">${esc(y.name)}</b><div class="mut" style="font-size:13px">${y.ex.length} Übungen · ${nsets(y)} Sätze</div></div><button class="round sm" data-act="start1" data-d="${y.id}" data-r="${x.id}" aria-label="Starten">${I("arrow",16)}</button></div>`).join(""):`<p class="mut" style="margin:0">Dieser Split hat noch keinen Tag.</p>`}<div class="row" style="gap:8px;margin-top:14px"><button class="${on?"pg":"pb"}" style="flex:1" data-act="spact">${on?"Nicht mehr aktiv":"Aktiv setzen"}</button><button class="pg" style="flex:1" data-act="sped">Bearbeiten</button></div></div></div></div>`}
 function ichSheet(){const m=V.rt2||"m",r=rt();
  const body=m==="h"?monthChart()+histBody():m==="f"?(S.hist.length>1?statsCard():`<p class="mut" style="margin:0">Der Fortschritt erscheint nach dem zweiten Training.</p>`)
@@ -830,9 +829,11 @@ function vWork3(){const c=S.cur;initT();const man=!!S.noTrk;const e=T.ex,sgl=e.s
  <div class="wk-bot"><div class="wk-c"><div class="row sp"><span class="mut row" style="font-size:13px;white-space:nowrap;gap:0">Satz ${T.si+1}/${e.sets.length}${exiBtn(e.n)}</span><span class="row" style="gap:6px">${wuB}<button class="pg" data-act="sw" style="height:28px;padding:0 10px;font-size:12px">Wechseln</button>${man?"":`<button class="pg" id="ms" data-act="rom" style="height:28px;padding:0 10px;font-size:12px">Bereit</button>`}</span></div><div class="row sp" style="margin-top:8px;gap:10px"><b class="wk-ex">${esc(e.n)}</b>${man?`<button class="pb" id="go" data-act="mfin" style="height:48px;flex:none">Satz fertig</button>`:`<button class="pb" id="go" data-act="go" style="height:48px;flex:none">Satz starten</button>`}</div></div>
  <div class="row" style="gap:10px;align-items:stretch"><div class="wk-c" style="flex:1"><div class="mut" style="font-size:13px">Ziel</div><div class="reps2">${T.target}<small> Wdh.</small></div></div><div class="wk-c" style="flex:1"><div class="mut" style="font-size:13px">Gewicht</div><div class="row kgrow" style="gap:4px;margin-top:12px;justify-content:space-between"><button class="round sm" data-act="kgm">${I("minus",18)}</button><b class="mono kgv"><span id="kg">${T.kg}</span><small>kg</small></b><button class="round sm" data-act="kgp">${I("plus",18)}</button></div>${sgl}</div></div></div></div>`+(V.wl?wlSheet():"")+(V.sw?swSheet():"")}
 function manReps(){const T0=+T.target||8,pv=T.ex.sets.slice(0,T.si).filter(z=>z.d&&!z.wu).pop();return T.mr==null?(pv?+pv.r||T0:T0):T.mr}
-function manStage(){const T0=+T.target||8,r=manReps();
- return `<div class="wk-stage" id="trk"><div class="mn"><div class="mn-l">Wiederholungen</div><div class="mn-r"><button class="round" data-act="mrm" aria-label="Weniger">${I("minus",22)}</button><b id="mr">${r}</b><button class="round" data-act="mrp" aria-label="Mehr">${I("plus",22)}</button></div><div class="mn-s" id="mnq">${Array.from({length:12},(_,i)=>12-i).map(v=>`<button class="mn-b ${v<=r?"on":""} ${v===T0?"tg":""}" data-act="mrq" data-v="${v}" style="--i:${v}" aria-label="${v} Wiederholungen"><i>${v}</i>${v===T0?"<em>Ziel</em>":""}</button>`).join("")}</div></div></div>`}
-function manSet(v){T.mr=Math.max(0,Math.min(99,v));const e=$("mr");if(e){e.textContent=T.mr;e.classList.remove("pop");void e.offsetWidth;e.classList.add("pop")}document.querySelectorAll("#mnq .mn-b").forEach(c=>c.classList.toggle("on",+c.dataset.v<=T.mr))}
+function manPaint(){const r=T.mr==null?manReps():T.mr,bs=[...document.querySelectorAll("#mnq .mm-b")];bs.forEach(c=>{const v=+c.dataset.v,on=v<=r&&r>0;c.classList.toggle("on",on);c.classList.toggle("top",on&&v===Math.min(r,12));const k=Math.min(1,(v-1)/Math.max(1,Math.min(r,12)-1));c.style.background=on&&v!==Math.min(r,12)?"rgb("+Math.round(255-k*125)+","+Math.round(255-k*125)+","+Math.round(255-k*125)+")":""});
+ const p=$("mnp");if(p)[...p.children].forEach((i,k)=>i.classList.toggle("on",k<r))}
+function manStage(){const T0=+T.target||8,r=manReps();setTimeout(manPaint,0);
+ return `<div class="wk-stage" id="trk"><div class="wk-cue"><div class="cue">Bereit</div><div class="reps3"><span id="mr">${r}</span><small> Wdh.</small></div><div class="pips" id="mnp">${Array.from({length:Math.max(1,Math.min(12,T0))},()=>"<i></i>").join("")}</div><div class="mm-r"><button class="round" data-act="mrm" aria-label="Weniger">${I("minus",18)}</button><button class="round" data-act="mrp" aria-label="Mehr">${I("plus",18)}</button></div></div><div class="mm-rail" id="mnq">${Array.from({length:12},(_,i)=>i+1).map(v=>`<button class="mm-b ${v===T0?"tg":""}" data-act="mrq" data-v="${v}" aria-label="${v} Wiederholungen"></button>`).join("")}</div></div>`}
+function manSet(v){T.mr=Math.max(0,Math.min(99,v));const e=$("mr");if(e){e.textContent=T.mr;e.classList.remove("pop");void e.offsetWidth;e.classList.add("pop")}manPaint()}
 function manFin(){const r=manReps();if(r<=0){alert("Trage mindestens 1 Wiederholung ein.");return}const s=S.cur.ex[T.ei].sets[T.si];T.reps=r;T.qs=[];
  if(!s.wu){let x=0;for(let i=1;i<=r;i++)x+=xpFor(T.kg,i,T.target).n;T.xs=x;S.xp=(S.xp||0)+x;S.cur.xp=(S.cur.xp||0)+x}
  finSet()}
@@ -1004,9 +1005,9 @@ function addFriend(raw){try{let c=(raw||"").trim();const i=c.indexOf("f=");if(i>
   if(rec.s&&(!S.stu||!S.stu.n)&&confirm("Dein Freund trainiert im Studio „"+rec.s+"“. Dort beitreten?"))S.stu={n:rec.s};
   save();alert(rec.n+(e?" aktualisiert.":" hinzugefügt."));return true}catch(e){alert("Der Link oder Code ist ungültig.");return false}}
 function vLib(){const e=V.pt==="e",seg=`<div class="row" style="gap:8px;margin-top:14px"><button class="chip ${e?"":"on"}" data-act="lt" data-t="w">Workouts</button><button class="chip ${e?"on":""}" data-act="lt" data-t="e">Übungen</button></div>`;return e?vEx(seg):vPre(seg)}
-function R(){if(V.v!=="today")V.xsDone=0;if(V.v!=="day")V.ap=0;if(V.v!=="community")V.stp=0;if(V.v!=="today")V.sp=0;if(V.v==="routines"){V.v="today";V.ich=1}if(V.v!=="today")V.ich=0;if(V.ich&&V.rt2==="d")V.rt2="m";if(V.v!=="workout")V.wl=V.sw=0;const v=V.v,nv=["today","routines","presets","community","tracker","hist","acct"].includes(v),ch=V.last!==v;document.body.className=nv?"":"nn";
+function R(){if(V.v!=="today")V.xsDone=0;if(V.v!=="day")V.ap=0;if(V.v!=="community")V.stp=0;if(V.v!=="today")V.spo=0;if(V.v==="routines"){V.v="today";V.ich=1}if(V.v!=="today")V.ich=0;if(V.ich&&V.rt2==="d")V.rt2="m";if(V.v!=="workout")V.wl=V.sw=0;const v=V.v,nv=["today","routines","presets","community","tracker","hist","acct"].includes(v),ch=V.last!==v;document.body.className=nv?"":"nn";
  const F={today:vToday,routines:vRoutines,routine:vRoutine,day:vDay,preview:vPrev,workout:vWork3,track:vTrack,stats:vStats,tracker:vTracker,hist:vHist,acct:vAcct,test:vTest,exercises:vEx,presets:()=>{V.rt2="d";return vRoutines()},community:vCommunity};
- $("app").innerHTML=F[v]()+(V.sh?sheet():"")+(V.ap&&v==="day"?apSheet():"")+(V.dsh?daySheet():"")+(V.sp&&v==="today"?spSheet():"")+(V.xp?exSheet():"")+(V.menu&&nv?menuSheet():"")+(V.stp&&v==="community"?stuSheet():"")+(V.exi?exiSheet():"")+(V.ich&&v==="today"?ichSheet():"")+(!S.su&&v==="today"?suSheet():!S.ob&&v==="today"?obSheet():"")+(V.fs&&v==="community"?frSheet():"")+(V.wr?wrSheet():"")+(S.cur&&v!=="workout"&&v!=="track"?`<button class="fab ${nv?"":"low"}" data-act="resume" aria-label="Aktuelles Training">${I("dumb",22,2.4)}</button>`:"");ssSync(true);
+ $("app").innerHTML=F[v]()+(V.sh?sheet():"")+(V.ap&&v==="day"?apSheet():"")+(V.dsh?daySheet():"")+(V.spo&&v==="today"?spSheet():"")+(V.xp?exSheet():"")+(V.menu&&nv?menuSheet():"")+(V.stp&&v==="community"?stuSheet():"")+(V.exi?exiSheet():"")+(V.ich&&v==="today"?ichSheet():"")+(!S.su&&v==="today"?suSheet():!S.ob&&v==="today"?obSheet():"")+(V.fs&&v==="community"?frSheet():"")+(V.wr?wrSheet():"")+(S.cur&&v!=="workout"&&v!=="track"?`<button class="fab ${nv?"":"low"}" data-act="resume" aria-label="Aktuelles Training">${I("dumb",22,2.4)}</button>`:"");ssSync(true);
  $("nav").style.display=nv?"block":"none";const TB=[["today","grid","Heute"],["presets","compass","Entdecken"],["community","users","Community"],["acct","user","Konto"]],cur=v;
  if(!$("nav").querySelector(".tabs"))$("nav").innerHTML=`<div class="tabs"><i class="ind"></i>${TB.map(([k,i,n])=>`<button data-act="goto" data-v="${k}">${I(i,22,2)}<span>${n}</span></button>`).join("")}</div>`;
  [...$("nav").querySelectorAll(".tabs button")].forEach(b=>b.classList.toggle("on",b.dataset.v===cur));navInd(nv);
@@ -1397,10 +1398,10 @@ document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(
  else if(a==="hall"){V.hall=!V.hall}
  else if(a==="ich"){V.ich=1;V.rt2=D.t||"m"}
  else if(a==="icx")V.ich=0;
- else if(a==="spo")V.sp=+D.r;
- else if(a==="spx")V.sp=0;
- else if(a==="spact"){S.act=S.act===V.sp?0:V.sp}
- else if(a==="sped"){V.rid=V.sp;V.sp=0;V.v="routine"}
+ else if(a==="spo")V.spo=+D.r;
+ else if(a==="spx")V.spo=0;
+ else if(a==="spact"){S.act=S.act===V.spo?0:V.spo}
+ else if(a==="sped"){V.rid=V.spo;V.spo=0;V.v="routine"}
  else if(a==="icacc"){V.ich=0;V.v="acct"}
  else if(a==="exi"){if(T&&T.run)return;V.exi=D.n}
  else if(a==="exix")V.exi=0;
