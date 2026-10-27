@@ -468,6 +468,10 @@ svg.pls rect,svg.pls circle{transform-box:fill-box;transform-origin:center}
 .ex-pf{transform-origin:115px 86px;animation:exq 3.6s cubic-bezier(.45,0,.35,1) infinite}
 @keyframes exq{0%,8%{transform:rotate(-100deg)}46%,56%{transform:rotate(0)}94%,100%{transform:rotate(-100deg)}}
 @media(prefers-reduced-motion:reduce){.ex-rua,.ex-rfa,.ex-dua,.ex-dfa,.ex-cr,.ex-cb,.ex-cf,.ex-pf{animation:none}}
+.xps{position:relative}.xst{position:absolute;right:16px;top:20px;height:auto}
+.gsp.an{transform-box:fill-box;transform-origin:left center;animation:gsin .6s cubic-bezier(.3,1.5,.5,1) both}.gsp.gl{filter:drop-shadow(0 0 7px rgba(255,255,255,.35))}
+@keyframes gsin{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.gsp.an{animation:none}}
 </style></head><body>
 <div id="splash" aria-hidden="true"><div class="sp-lg"><svg width="60" height="82" viewBox="0 0 60 82"><rect class="sb q1" y="70" width="60" height="12" rx="6"/><rect class="sb q2" y="52" width="60" height="12" rx="6"/><rect class="sb q3" y="34" width="60" height="12" rx="6"/><rect class="sy qy" width="60" height="12" rx="6"/></svg><div class="sp-wm"><span class="l" style="--k:0">s</span><span class="l" style="--k:1">t</span><span class="l" style="--k:2">a</span><span class="l" style="--k:3">c</span><span class="l" style="--k:4">k</span><span class="l pt" style="--k:5">.</span></div></div><div class="sp-cl">Ganz hoch, ganz runter.</div></div>
 <script>(function(){var sp=document.getElementById("splash");if(!sp)return;var skip=false;try{skip=/nosplash/.test(location.search)||sessionStorage.getItem("stk_sp")==="1";sessionStorage.setItem("stk_sp","1")}catch(e){}if(skip){sp.remove();return}var done=false;function end(){if(done)return;done=true;sp.classList.add("out");setTimeout(function(){sp.remove()},600)}sp.addEventListener("click",end);setTimeout(end,2600)})();</script>
@@ -528,13 +532,18 @@ function vToday(){const r=rt(),nd=nextDay(r),d=nd&&nd[0],k=nd?nd[1]:-1,t=new Dat
  return vOver()+hero(head+body)
  +`<div class="dk wkc"><div class="row sp" style="margin-bottom:12px"><span class="lbl" style="margin:0">Diese Woche</span><span class="mut" style="font-size:13px">${w.done} von ${w.plan} Tagen</span></div><div class="wkr">${wk}</div></div>`
  +ichTile(lg,lv)
- +`<div class="stg"><div class="stl">${I("dumb",22,2)}<span>Level ${lv.L}</span><b>${S.hist.length}</b></div><div class="stl hi">${I("bolt",22,2)}<span>XP Woche</span><b>${st.x}</b></div><div class="stl">${I("timer",22,2)}<span>Volumen</span><b>${fv(st.v)}</b></div></div>`
+ +`<div class="stg"><div class="stl">${I("dumb",22,2)}<span>Level ${lv.L}</span><b>${S.hist.length}</b></div><div class="stl hi xps">${I("bolt",22,2)}<span>XP Woche</span><b>${st.x}</b>${xpStack(st.x,xpGoal(),30)}</div><div class="stl">${I("timer",22,2)}<span>Volumen</span><b>${fv(st.v)}</b></div></div>`
  +notes()+oth}
 function ichTile(lg,lv){const l=S.hist[S.hist.length-1],nm=S.name||"Athlet",tv=S.hist.reduce((a,h)=>a+vol(h),0),
  cell=(t,ic,v,u)=>`<button class="ich-c" data-act="ich" data-t="${t}">${I(ic,18,2)}<b>${v}</b><span>${u}</span></button>`;
  return `<div class="dk ich-t"><div class="row sp" style="margin-bottom:12px"><span class="lbl" style="margin:0">Ich</span><button class="lnk" data-act="icacc">Konto ${I("chev",14,2.4)}</button></div>
  <div class="row" style="gap:14px"><div class="av2 ich-av" ${S.pic?`style="background:url(${S.pic}) center/cover;color:transparent"`:""}>${S.pic?"":esc(nm[0].toUpperCase())}</div><div style="flex:1;min-width:0"><b style="font-size:19px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(nm)}${S.hd?` <span class="mut" style="font-size:13px;font-weight:500">@${esc(S.hd)}</span>`:""}</b><div class="mut" style="font-size:13px;padding:0">Level ${lv.L} · ${lg.n}${l?" · zuletzt "+esc(l.name||"Training"):""}</div><div class="bar2 lt" style="margin:8px 0 0"><i style="width:${Math.round(lv.p*100)}%"></i></div></div></div>
  <div class="ich-g">${cell("m","list",S.rt.length,"Workouts")}${cell("h","timer",S.hist.length,"Verlauf")}${cell("f","bolt",Math.round(tv/100)/10+" t","Fortschritt")}</div></div>`}
+/* ---------- XP als Stack ---------- */
+function xpGoal(){const a=[1,2,3,4].map(j=>statAt(wsOf(-j)).x).filter(v=>v>0);return a.length?Math.max(100,Math.ceil(a.reduce((x,y)=>x+y,0)/a.length*1.1/50)*50):500}
+function xpStack(x,goal,wd){const p=Math.max(0,Math.min(1,x/goal)),an=!V.xsDone;V.xsDone=1;let r="";
+ for(let i=0;i<5;i++){const y=(4-i)*10,f=Math.max(0,Math.min(1,p*5-i));r+=`<rect x="0" y="${y}" width="40" height="6" rx="3" fill="rgba(0,0,0,.2)"/>${f>0?`<rect class="gsp${an?" an":""}" ${an?`style="animation-delay:${(i*.09).toFixed(2)}s"`:""} x="0" y="${y}" width="${Math.max(6,40*f)}" height="6" rx="3" fill="#111"/>`:""}`}
+ return`<svg class="xst" viewBox="0 0 40 46" width="${wd}" aria-hidden="true">${r}</svg>`}
 function segB(a,cur,arr){return`<div class="seg">${arr.map(([k,t])=>`<button class="${cur===k?"on":""}" data-act="${a}" data-t="${k}">${t}</button>`).join("")}</div>`}
 function vRoutines(){const r=rt(),m=V.v==="routines"&&(V.rt2||"m")==="d"?"m":(V.rt2||"m"),tgt=S.rt.find(x=>x.id===V.pr);
  const dt=V.dt||"s",sub=`<div class="row" style="gap:8px;margin:14px 0 2px">${[["s","Splits"],["e","Übungen"]].map(([k,t])=>`<button class="chip ${dt===k?"on":""}" data-act="dt" data-t="${k}">${t}</button>`).join("")}</div>`;
@@ -976,7 +985,7 @@ function addFriend(raw){try{let c=(raw||"").trim();const i=c.indexOf("f=");if(i>
   if(rec.s&&(!S.stu||!S.stu.n)&&confirm("Dein Freund trainiert im Studio „"+rec.s+"“. Dort beitreten?"))S.stu={n:rec.s};
   save();alert(rec.n+(e?" aktualisiert.":" hinzugefügt."));return true}catch(e){alert("Der Link oder Code ist ungültig.");return false}}
 function vLib(){const e=V.pt==="e",seg=`<div class="row" style="gap:8px;margin-top:14px"><button class="chip ${e?"":"on"}" data-act="lt" data-t="w">Workouts</button><button class="chip ${e?"on":""}" data-act="lt" data-t="e">Übungen</button></div>`;return e?vEx(seg):vPre(seg)}
-function R(){if(V.v!=="day")V.ap=0;if(V.v!=="community")V.stp=0;if(V.v==="routines"){V.v="today";V.ich=1}if(V.v!=="today")V.ich=0;if(V.ich&&V.rt2==="d")V.rt2="m";if(V.v!=="workout")V.wl=V.sw=0;const v=V.v,nv=["today","routines","presets","community","tracker","hist","acct"].includes(v),ch=V.last!==v;document.body.className=nv?"":"nn";
+function R(){if(V.v!=="today")V.xsDone=0;if(V.v!=="day")V.ap=0;if(V.v!=="community")V.stp=0;if(V.v==="routines"){V.v="today";V.ich=1}if(V.v!=="today")V.ich=0;if(V.ich&&V.rt2==="d")V.rt2="m";if(V.v!=="workout")V.wl=V.sw=0;const v=V.v,nv=["today","routines","presets","community","tracker","hist","acct"].includes(v),ch=V.last!==v;document.body.className=nv?"":"nn";
  const F={today:vToday,routines:vRoutines,routine:vRoutine,day:vDay,preview:vPrev,workout:vWork3,track:vTrack,stats:vStats,tracker:vTracker,hist:vHist,acct:vAcct,test:vTest,exercises:vEx,presets:()=>{V.rt2="d";return vRoutines()},community:vCommunity};
  $("app").innerHTML=F[v]()+(V.sh?sheet():"")+(V.ap&&v==="day"?apSheet():"")+(V.dsh?daySheet():"")+(V.xp?exSheet():"")+(V.menu&&nv?menuSheet():"")+(V.stp&&v==="community"?stuSheet():"")+(V.exi?exiSheet():"")+(V.ich&&v==="today"?ichSheet():"")+(!S.su&&v==="today"?suSheet():!S.ob&&v==="today"?obSheet():"")+(V.fs&&v==="community"?frSheet():"")+(V.wr?wrSheet():"")+(S.cur&&v!=="workout"&&v!=="track"?`<button class="fab ${nv?"":"low"}" data-act="resume" aria-label="Aktuelles Training">${I("dumb",22,2.4)}</button>`:"");ssSync(true);
  $("nav").style.display=nv?"block":"none";const TB=[["today","grid","Heute"],["presets","compass","Entdecken"],["community","users","Community"],["acct","user","Konto"]],cur=v;
@@ -1042,7 +1051,8 @@ async function reviewImg(){
  tx(w.w===1?"Training":"Trainings",M+52,300+tf*.8+70,"500 44px "+BF,"#b9b9b9");
  /* XP */
  gcard(M,676,CW,230,56,0);
- {const f=fit(String(w.x),0,150,70,CW-300,800);tx(String(w.x),M+46,676+f*.8+40,"800 "+f+"px "+HF,AC);tx("XP diese Woche",M+52,676+200,"500 34px "+BF,"#8e8e8e")}
+ {const gl=xpGoal(),pr=Math.max(0,Math.min(1,w.x/gl)),f=fit(String(w.x),0,120,70,CW-420,800);tx(String(w.x),M+46,676+f*.8+44,"800 "+f+"px "+HF,AC);tx("XP diese Woche",M+52,676+176,"500 34px "+BF,"#8e8e8e");tx("Ziel "+gl,M+52,676+212,"500 26px "+BF,"#6f6f6f");
+  for(let i=0;i<5;i++){const fl=Math.max(0,Math.min(1,pr*5-i)),yy=676+36+(4-i)*30,sw=300,sx=W-M-48-sw;rr(sx,yy,sw,20,10,"rgba(255,255,255,.1)");if(fl>0){x.save();if(pr>=1&&i===4){x.shadowColor="rgba(228,255,58,.7)";x.shadowBlur=24}rr(sx,yy,Math.max(20,sw*fl),20,10,AC);x.restore()}}}
  /* Wochentage */
  gcard(M,936,CW,230,56,0);
  const days=new Set(S.hist.map(h=>key(new Date(h.t)))),td=key(new Date()),sp=(CW-96-84)/6;
